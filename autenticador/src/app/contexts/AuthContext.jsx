@@ -111,9 +111,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = useCallback(
-    async ({ name, email, password, confirmPassword }) => {
+    async ({ name, username, email, password, confirmPassword }) => {
       const result = await registerUser({
         name,
+        username,
         email,
         password,
         confirmPassword,

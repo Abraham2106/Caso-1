@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -6,7 +6,7 @@ import AuthCard from "../components/auth/AuthCard";
 import AuthField from "../components/auth/AuthField";
 import { useAuth } from "../contexts/AuthContext";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 const GENERIC_MESSAGE = "Si el correo existe, enviamos instrucciones.";
 
 function ForgotPasswordPage() {
@@ -50,11 +50,16 @@ function ForgotPasswordPage() {
     }
 
     setIsLoading(true);
-    await requestPasswordReset(email.trim(), redirectTo);
+    const result = await requestPasswordReset(email.trim(), redirectTo);
     setIsLoading(false);
 
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
     setIsSubmitted(true);
-    toast.success(GENERIC_MESSAGE);
+    toast.success(result.message || GENERIC_MESSAGE);
   };
 
   const resetState = () => {

@@ -74,6 +74,7 @@ function UsersSection({
               >
                 <div>
                   <p className="text-[14px] font-medium text-[#323130]">{item.name}</p>
+                  <p className="text-[13px] text-[#605e5c]">Usuario: {item.username || "-"}</p>
                   <p className="text-[13px] text-[#605e5c]">{item.email}</p>
                   <p className="text-[12px] text-[#605e5c]">Rol: {item.role}</p>
                 </div>

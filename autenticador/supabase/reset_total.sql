@@ -1,14 +1,32 @@
 -- ============================================================
--- SCHEMA SIMPLE PARA CASO 1
--- Usuario/rol/contrasena en public.users (sin hashing, prototipo)
+-- RESET TOTAL (AUTH + PUBLIC) - FLUJO SIMPLE
 -- ============================================================
 -- Ejecutar en Supabase SQL Editor.
+-- ADVERTENCIA: borra todos los usuarios y datos del proyecto.
 
 begin;
 
+-- Limpiar objetos previos
+drop trigger if exists on_auth_user_created on auth.users;
+drop trigger if exists on_auth_user_inserted on auth.users;
+drop trigger if exists on_auth_user_updated on auth.users;
+
+drop function if exists public.handle_new_auth_user();
+drop function if exists public.trg_sync_auth_user_to_profile();
+drop function if exists public.trg_set_updated_at();
+drop function if exists public.trg_normalize_user_fields();
+drop function if exists public.current_user_is_admin();
+drop function if exists public.current_user_email();
+
+-- Borrar autenticacion (si existe)
+delete from auth.users;
+
+-- Borrar tablas public
 drop table if exists public.data_records cascade;
 drop table if exists public.users cascade;
+drop table if exists public.roles cascade;
 
+-- Crear esquema simple
 create table public.users (
   id bigint generated always as identity primary key,
   name text not null,
@@ -71,17 +89,33 @@ create trigger trg_data_records_set_updated_at
 before update on public.data_records
 for each row execute function public.trg_set_updated_at();
 
+-- RLS abierta para prototipo
 alter table public.users enable row level security;
 alter table public.data_records enable row level security;
 
-drop policy if exists "users select" on public.users;
-drop policy if exists "users insert" on public.users;
-drop policy if exists "users update" on public.users;
-drop policy if exists "users delete" on public.users;
-drop policy if exists "data select" on public.data_records;
-drop policy if exists "data insert" on public.data_records;
-drop policy if exists "data update" on public.data_records;
-drop policy if exists "data delete" on public.data_records;
+do $$
+declare
+  p record;
+begin
+  for p in
+    select policyname from pg_policies
+    where schemaname = 'public' and tablename = 'users'
+  loop
+    execute format('drop policy if exists %I on public.users', p.policyname);
+  end loop;
+end $$;
+
+do $$
+declare
+  p record;
+begin
+  for p in
+    select policyname from pg_policies
+    where schemaname = 'public' and tablename = 'data_records'
+  loop
+    execute format('drop policy if exists %I on public.data_records', p.policyname);
+  end loop;
+end $$;
 
 create policy "users select"
 on public.users
@@ -137,18 +171,11 @@ using (true);
 insert into public.users (name, username, email, password, role)
 values
   ('Demo Admin', 'demo', 'demo@example', 'demo123', 'admin'),
-  ('Demo User', 'userdemo', 'user@example', 'user123', 'user')
-on conflict (email) do update
-set
-  name = excluded.name,
-  username = excluded.username,
-  password = excluded.password,
-  role = excluded.role;
+  ('Demo User', 'userdemo', 'user@example', 'user123', 'user');
 
 insert into public.data_records (key, value)
 values
   ('region', 'Costa Rica'),
-  ('entorno', 'Produccion')
-on conflict do nothing;
+  ('entorno', 'Produccion');
 
 commit;
