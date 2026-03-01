@@ -5,7 +5,7 @@ import AuthCard from "../components/auth/AuthCard";
 import AuthField from "../components/auth/AuthField";
 import { useAuth } from "../contexts/AuthContext";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ function RegisterPage() {
 
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -20,6 +21,7 @@ function RegisterPage() {
 
   const [errors, setErrors] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -30,6 +32,7 @@ function RegisterPage() {
   const validateForm = () => {
     const nextErrors = {
       name: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -37,6 +40,12 @@ function RegisterPage() {
 
     if (!formData.name.trim()) {
       nextErrors.name = "Campo obligatorio";
+    }
+
+    if (!formData.username.trim()) {
+      nextErrors.username = "Campo obligatorio";
+    } else if (!/^[a-zA-Z0-9._-]{3,30}$/.test(formData.username.trim())) {
+      nextErrors.username = "Usuario invalido";
     }
 
     if (!formData.email.trim()) {
@@ -125,6 +134,18 @@ function RegisterPage() {
         />
 
         <AuthField
+          id="username"
+          name="username"
+          type="text"
+          label="Nombre de usuario"
+          value={formData.username}
+          onChange={handleChange}
+          error={errors.username}
+          disabled={isLoading}
+          autoComplete="username"
+        />
+
+        <AuthField
           id="password"
           name="password"
           type="password"
@@ -167,7 +188,7 @@ function RegisterPage() {
       </form>
 
       <div className="mt-6 border-t border-[#e1e1e1] pt-4 text-center text-[14px] text-[#605e5c]">
-        ¿Ya tiene cuenta?{" "}
+        &iquest;Ya tiene cuenta?{" "}
         <Link to="/login" className="text-[#0078D4]">
           Iniciar sesion
         </Link>
@@ -177,4 +198,6 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
+
+
 

@@ -5,7 +5,7 @@ import AuthCard from "../components/auth/AuthCard";
 import AuthField from "../components/auth/AuthField";
 import { useAuth } from "../contexts/AuthContext";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ function LoginPage() {
 
         <div className="text-right">
           <Link to="/forgot-password" className="text-[14px] text-[#0078D4]">
-            ¿Olvido su contrasena?
+            &iquest;Olvido su contrasena?
           </Link>
         </div>
 
@@ -105,7 +105,7 @@ function LoginPage() {
       </form>
 
       <div className="mt-6 border-t border-[#e1e1e1] pt-4 text-center text-[14px] text-[#605e5c]">
-        ¿No tiene cuenta?{" "}
+        &iquest;No tiene cuenta?{" "}
         <Link to="/register" className="text-[#0078D4]">
           Registrarse
         </Link>
@@ -115,3 +115,5 @@ function LoginPage() {
 }
 
 export default LoginPage;
+
+

@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Database, Stethoscope, User, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import UsersSection from "../components/dashboard/UsersSection";
 import DataSection from "../components/dashboard/DataSection";
 import HealthSection from "../components/dashboard/HealthSection";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -303,3 +303,4 @@ function DashboardPage() {
 }
 
 export default DashboardPage;
+

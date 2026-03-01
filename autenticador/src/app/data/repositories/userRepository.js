@@ -1,6 +1,8 @@
-﻿import supabase from "../../utils/supabase";
+import supabase from "../../utils/supabase";
 
 const USERS_TABLE = "users";
+const USER_SELECT_SAFE = "id,username,name,email,role,created_at";
+const USER_SELECT_WITH_PASSWORD = "id,username,name,email,password,role,created_at";
 
 function ensureNoError(error, context) {
   if (error) {
@@ -8,70 +10,91 @@ function ensureNoError(error, context) {
   }
 }
 
-function mapUserRecord(record) {
+function mapUserRecord(record, includePassword = false) {
   if (!record) {
     return null;
   }
 
-  return {
+  const baseUser = {
     id: record.id,
-    authUserId: record.auth_user_id ?? null,
+    username: record.username,
     name: record.name,
     email: record.email,
     role: record.role ?? "user",
     createdAt: record.created_at ?? record.createdAt ?? null,
+  };
+
+  if (!includePassword) {
+    return baseUser;
+  }
+
+  return {
+    ...baseUser,
+    password: record.password,
   };
 }
 
 export async function listUsers() {
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .select("id,auth_user_id,name,email,role,created_at")
+    .select(USER_SELECT_SAFE)
     .order("id", { ascending: true });
 
   ensureNoError(error, "Error al consultar usuarios");
 
-  return (data ?? []).map(mapUserRecord);
+  return (data ?? []).map((record) => mapUserRecord(record));
 }
 
-export async function getUserByEmail(email) {
+export async function getUserByEmail(email, options = {}) {
   const normalizedEmail = email.trim().toLowerCase();
+  const includePassword = options.withPassword ?? false;
 
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .select("id,auth_user_id,name,email,role,created_at")
+    .select(includePassword ? USER_SELECT_WITH_PASSWORD : USER_SELECT_SAFE)
     .eq("email", normalizedEmail)
     .maybeSingle();
 
   ensureNoError(error, "Error al consultar usuario por correo");
 
-  return mapUserRecord(data);
+  return mapUserRecord(data, includePassword);
 }
 
-export async function getUserByAuthId(authUserId) {
+export async function getUserByUsername(username, options = {}) {
+  const normalizedUsername = username.trim().toLowerCase();
+  const includePassword = options.withPassword ?? false;
+
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .select("id,auth_user_id,name,email,role,created_at")
-    .eq("auth_user_id", authUserId)
+    .select(includePassword ? USER_SELECT_WITH_PASSWORD : USER_SELECT_SAFE)
+    .eq("username", normalizedUsername)
     .maybeSingle();
 
-  ensureNoError(error, "Error al consultar usuario por auth id");
+  ensureNoError(error, "Error al consultar usuario por nombre de usuario");
 
-  return mapUserRecord(data);
+  return mapUserRecord(data, includePassword);
 }
 
-export async function createUser({ name, email, role = "user", authUserId = null }) {
+export async function createUser({
+  name,
+  username,
+  email,
+  password,
+  role = "user",
+}) {
   const normalizedEmail = email.trim().toLowerCase();
+  const normalizedUsername = username.trim().toLowerCase();
 
   const { data, error } = await supabase
     .from(USERS_TABLE)
     .insert({
-      name,
+      name: name.trim(),
+      username: normalizedUsername,
       email: normalizedEmail,
+      password,
       role,
-      auth_user_id: authUserId,
     })
-    .select("id,auth_user_id,name,email,role,created_at")
+    .select(USER_SELECT_SAFE)
     .maybeSingle();
 
   ensureNoError(error, "Error al crear usuario");
@@ -79,26 +102,19 @@ export async function createUser({ name, email, role = "user", authUserId = null
   return mapUserRecord(data);
 }
 
-export async function upsertUserProfile({ authUserId, name, email, role = "user" }) {
+export async function updateUserPasswordByEmail(email, password) {
   const normalizedEmail = email.trim().toLowerCase();
 
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .upsert(
-      {
-        auth_user_id: authUserId,
-        name,
-        email: normalizedEmail,
-        role,
-      },
-      {
-        onConflict: "email",
-      },
-    )
-    .select("id,auth_user_id,name,email,role,created_at")
+    .update({
+      password,
+    })
+    .eq("email", normalizedEmail)
+    .select(USER_SELECT_SAFE)
     .maybeSingle();
 
-  ensureNoError(error, "Error al sincronizar perfil de usuario");
+  ensureNoError(error, "Error al actualizar contrasena");
 
   return mapUserRecord(data);
 }
@@ -116,4 +132,3 @@ export async function deleteUserByEmail(email) {
 
   return (data?.length ?? 0) > 0;
 }
-

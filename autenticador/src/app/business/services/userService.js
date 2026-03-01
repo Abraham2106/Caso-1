@@ -1,16 +1,18 @@
-﻿import {
+import {
   createUser,
   deleteUserByEmail,
   getUserByEmail,
+  getUserByUsername,
   listUsers,
 } from "../../data/repositories/userRepository";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
+const DEFAULT_MANAGED_USER_PASSWORD = "temporal123";
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const sanitizeUser = (user) => ({
   id: user.id,
-  authUserId: user.authUserId ?? null,
+  username: user.username ?? "",
   name: user.name,
   email: user.email,
   role: user.role ?? "user",
@@ -23,6 +25,34 @@ function getErrorMessage(error, fallback) {
   }
 
   return fallback;
+}
+
+function buildBaseUsername(email) {
+  const localPart = email.split("@")[0] ?? "";
+  const normalized = localPart
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "")
+    .slice(0, 24);
+
+  return normalized || "usuario";
+}
+
+async function resolveAvailableUsername(baseUsername) {
+  let candidate = baseUsername;
+  let suffix = 1;
+
+  while (suffix <= 1000) {
+    const existing = await getUserByUsername(candidate);
+
+    if (!existing) {
+      return candidate;
+    }
+
+    candidate = `${baseUsername}${suffix}`;
+    suffix += 1;
+  }
+
+  throw new Error("No fue posible generar un nombre de usuario disponible.");
 }
 
 export async function getManagedUsers() {
@@ -58,16 +88,21 @@ export async function createManagedUser({ name, email, role = "user" }) {
       };
     }
 
+    const username = await resolveAvailableUsername(
+      buildBaseUsername(normalizedEmail),
+    );
+
     const created = await createUser({
       name: name.trim(),
+      username,
       email: normalizedEmail,
+      password: DEFAULT_MANAGED_USER_PASSWORD,
       role,
-      authUserId: null,
     });
 
     return {
       success: true,
-      message: "Perfil creado correctamente.",
+      message: `Perfil creado correctamente. Usuario: ${username}, clave temporal: ${DEFAULT_MANAGED_USER_PASSWORD}.`,
       user: sanitizeUser(created),
     };
   } catch (error) {
