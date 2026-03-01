@@ -2,7 +2,11 @@
 import { useAuth } from "../contexts/AuthContext";
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isBootstrapping } = useAuth();
+
+  if (isBootstrapping) {
+    return <div className="min-h-screen bg-[#f3f3f3]" />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -12,3 +16,4 @@ function ProtectedRoute({ children }) {
 }
 
 export default ProtectedRoute;
+

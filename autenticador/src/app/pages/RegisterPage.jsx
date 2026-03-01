@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AuthCard from "../components/auth/AuthCard";
@@ -88,7 +88,13 @@ function RegisterPage() {
     }
 
     toast.success(result.message);
-    setTimeout(() => navigate("/dashboard"), 300);
+
+    if (result.user) {
+      setTimeout(() => navigate("/dashboard"), 300);
+      return;
+    }
+
+    setTimeout(() => navigate("/login"), 300);
   };
 
   return (
@@ -161,7 +167,7 @@ function RegisterPage() {
       </form>
 
       <div className="mt-6 border-t border-[#e1e1e1] pt-4 text-center text-[14px] text-[#605e5c]">
-        �Ya tiene cuenta?{" "}
+        ¿Ya tiene cuenta?{" "}
         <Link to="/login" className="text-[#0078D4]">
           Iniciar sesion
         </Link>
@@ -171,3 +177,4 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
+
