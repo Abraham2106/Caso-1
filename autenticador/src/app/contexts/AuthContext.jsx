@@ -8,7 +8,16 @@ import {
   useMemo,
   useState,
 } from "react";
-import { loginUser, registerUser } from "../business/services/authService";
+import {
+  getCurrentAuthenticatedUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+  sendPasswordResetEmail,
+  subscribeToAuthState,
+  syncProfileWithAuthUser,
+  updateCurrentUserPassword,
+} from "../business/services/authService";
 import {
   createManagedUser,
   getManagedUsers,
@@ -41,23 +50,55 @@ export function AuthProvider({ children }) {
     return dataRecords;
   }, []);
 
+  const syncUserFromAuth = useCallback(
+    async (authUser = null) => {
+      try {
+        const profile = authUser
+          ? await syncProfileWithAuthUser(authUser)
+          : await getCurrentAuthenticatedUser();
+
+        setUser(profile);
+
+        if (profile) {
+          await refreshUsers();
+        }
+      } catch (error) {
+        console.error(error);
+        setUser(null);
+      }
+    },
+    [refreshUsers],
+  );
+
   useEffect(() => {
     let isMounted = true;
 
     const bootstrap = async () => {
       await Promise.all([refreshUsers(), refreshData()]);
+      await syncUserFromAuth();
 
-      if (isMounted) {
-        setIsBootstrapping(false);
+      if (!isMounted) {
+        return;
       }
+
+      setIsBootstrapping(false);
     };
+
+    const unsubscribe = subscribeToAuthState((authUser) => {
+      if (!isMounted) {
+        return;
+      }
+
+      syncUserFromAuth(authUser);
+    });
 
     bootstrap();
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
-  }, [refreshUsers, refreshData]);
+  }, [refreshData, refreshUsers, syncUserFromAuth]);
 
   const login = useCallback(async (email, password) => {
     const result = await loginUser({ email, password });
@@ -78,9 +119,12 @@ export function AuthProvider({ children }) {
         confirmPassword,
       });
 
+      if (result.success) {
+        await refreshUsers();
+      }
+
       if (result.success && result.user) {
         setUser(result.user);
-        await refreshUsers();
       }
 
       return result;
@@ -88,13 +132,27 @@ export function AuthProvider({ children }) {
     [refreshUsers],
   );
 
-  const logout = useCallback(() => {
-    setUser(null);
+  const logout = useCallback(async () => {
+    const result = await logoutUser();
+
+    if (result.success) {
+      setUser(null);
+    }
+
+    return result;
+  }, []);
+
+  const requestPasswordReset = useCallback(async (email, redirectTo) => {
+    return sendPasswordResetEmail({ email, redirectTo });
+  }, []);
+
+  const updatePassword = useCallback(async (password) => {
+    return updateCurrentUserPassword(password);
   }, []);
 
   const createUserAccount = useCallback(
-    async ({ name, email, password }) => {
-      const result = await createManagedUser({ name, email, password });
+    async ({ name, email, role }) => {
+      const result = await createManagedUser({ name, email, role });
 
       if (result.success) {
         await refreshUsers();
@@ -170,6 +228,8 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      requestPasswordReset,
+      updatePassword,
       createUserAccount,
       deleteUserAccount,
       createDataItem,
@@ -184,6 +244,8 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      requestPasswordReset,
+      updatePassword,
       createUserAccount,
       deleteUserAccount,
       createDataItem,
@@ -204,3 +266,4 @@ export function useAuth() {
 
   return context;
 }
+

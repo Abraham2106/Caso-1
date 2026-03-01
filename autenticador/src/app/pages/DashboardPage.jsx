@@ -51,12 +51,10 @@ function DashboardPage() {
   const [userForm, setUserForm] = useState({
     name: "",
     email: "",
-    password: "",
   });
   const [userErrors, setUserErrors] = useState({
     name: "",
     email: "",
-    password: "",
   });
   const [isSavingUser, setIsSavingUser] = useState(false);
 
@@ -68,9 +66,15 @@ function DashboardPage() {
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const [healthResult, setHealthResult] = useState(null);
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Sesion cerrada correctamente.");
+  const handleLogout = async () => {
+    const result = await logout();
+
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
+    toast.success(result.message);
     navigate("/login", { replace: true });
   };
 
@@ -80,7 +84,7 @@ function DashboardPage() {
   };
 
   const validateUserForm = () => {
-    const nextErrors = { name: "", email: "", password: "" };
+    const nextErrors = { name: "", email: "" };
 
     if (!userForm.name.trim()) {
       nextErrors.name = "Campo obligatorio";
@@ -90,12 +94,6 @@ function DashboardPage() {
       nextErrors.email = "Campo obligatorio";
     } else if (!EMAIL_REGEX.test(userForm.email.trim())) {
       nextErrors.email = "Correo invalido";
-    }
-
-    if (!userForm.password.trim()) {
-      nextErrors.password = "Campo obligatorio";
-    } else if (userForm.password.trim().length < 6) {
-      nextErrors.password = "Minimo 6 caracteres";
     }
 
     return nextErrors;
@@ -122,8 +120,8 @@ function DashboardPage() {
     }
 
     toast.success(result.message);
-    setUserForm({ name: "", email: "", password: "" });
-    setUserErrors({ name: "", email: "", password: "" });
+    setUserForm({ name: "", email: "" });
+    setUserErrors({ name: "", email: "" });
   };
 
   const handleDeleteUser = async (email) => {

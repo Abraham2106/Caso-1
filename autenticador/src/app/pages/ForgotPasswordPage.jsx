@@ -1,21 +1,30 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import AuthCard from "../components/auth/AuthCard";
 import AuthField from "../components/auth/AuthField";
+import { useAuth } from "../contexts/AuthContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const GENERIC_MESSAGE = "Si el correo existe, enviamos instrucciones.";
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
+  const { requestPasswordReset } = useAuth();
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submittedEmail, setSubmittedEmail] = useState("");
+
+  const redirectTo = useMemo(() => {
+    const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+    const basePath = import.meta.env.BASE_URL ?? "/";
+    const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+    const baseUrl = publicUrl || window.location.origin;
+    return `${baseUrl}${normalizedBase}reset-password`;
+  }, []);
 
   const validateEmail = (value) => {
     if (!value.trim()) {
@@ -41,19 +50,16 @@ function ForgotPasswordPage() {
     }
 
     setIsLoading(true);
-    toast.info("Enviando enlace de recuperacion...");
-    await sleep(800);
+    await requestPasswordReset(email.trim(), redirectTo);
     setIsLoading(false);
 
-    setSubmittedEmail(email.trim());
     setIsSubmitted(true);
-    toast.success("Enlace enviado correctamente.");
+    toast.success(GENERIC_MESSAGE);
   };
 
   const resetState = () => {
     setEmail("");
     setError("");
-    setSubmittedEmail("");
     setIsSubmitted(false);
   };
 
@@ -66,9 +72,7 @@ function ForgotPasswordPage() {
           </div>
         </div>
 
-        <p className="mb-6 text-center text-[14px] text-[#605e5c]">
-          Se envio un enlace de recuperacion a <strong>{submittedEmail}</strong>.
-        </p>
+        <p className="mb-6 text-center text-[14px] text-[#605e5c]">{GENERIC_MESSAGE}</p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
@@ -96,7 +100,7 @@ function ForgotPasswordPage() {
       subtitle="Ingrese su correo para recibir instrucciones."
     >
       <div className="mb-5 rounded-[2px] border border-[#e1e1e1] bg-[#f3f3f3] p-3 text-[13px] text-[#605e5c]">
-        Se enviara enlace para restablecer su contrasena al correo indicado.
+        Se enviara un enlace para restablecer su contrasena.
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -137,3 +141,4 @@ function ForgotPasswordPage() {
 }
 
 export default ForgotPasswordPage;
+

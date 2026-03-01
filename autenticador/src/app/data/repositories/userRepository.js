@@ -15,9 +15,9 @@ function mapUserRecord(record) {
 
   return {
     id: record.id,
+    authUserId: record.auth_user_id ?? null,
     name: record.name,
     email: record.email,
-    password: record.password,
     role: record.role ?? "user",
     createdAt: record.created_at ?? record.createdAt ?? null,
   };
@@ -26,7 +26,7 @@ function mapUserRecord(record) {
 export async function listUsers() {
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .select("id,name,email,password,role,created_at")
+    .select("id,auth_user_id,name,email,role,created_at")
     .order("id", { ascending: true });
 
   ensureNoError(error, "Error al consultar usuarios");
@@ -39,7 +39,7 @@ export async function getUserByEmail(email) {
 
   const { data, error } = await supabase
     .from(USERS_TABLE)
-    .select("id,name,email,password,role,created_at")
+    .select("id,auth_user_id,name,email,role,created_at")
     .eq("email", normalizedEmail)
     .maybeSingle();
 
@@ -48,7 +48,19 @@ export async function getUserByEmail(email) {
   return mapUserRecord(data);
 }
 
-export async function createUser({ name, email, password }) {
+export async function getUserByAuthId(authUserId) {
+  const { data, error } = await supabase
+    .from(USERS_TABLE)
+    .select("id,auth_user_id,name,email,role,created_at")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+
+  ensureNoError(error, "Error al consultar usuario por auth id");
+
+  return mapUserRecord(data);
+}
+
+export async function createUser({ name, email, role = "user", authUserId = null }) {
   const normalizedEmail = email.trim().toLowerCase();
 
   const { data, error } = await supabase
@@ -56,12 +68,37 @@ export async function createUser({ name, email, password }) {
     .insert({
       name,
       email: normalizedEmail,
-      password,
+      role,
+      auth_user_id: authUserId,
     })
-    .select("id,name,email,password,role,created_at")
+    .select("id,auth_user_id,name,email,role,created_at")
     .maybeSingle();
 
   ensureNoError(error, "Error al crear usuario");
+
+  return mapUserRecord(data);
+}
+
+export async function upsertUserProfile({ authUserId, name, email, role = "user" }) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const { data, error } = await supabase
+    .from(USERS_TABLE)
+    .upsert(
+      {
+        auth_user_id: authUserId,
+        name,
+        email: normalizedEmail,
+        role,
+      },
+      {
+        onConflict: "email",
+      },
+    )
+    .select("id,auth_user_id,name,email,role,created_at")
+    .maybeSingle();
+
+  ensureNoError(error, "Error al sincronizar perfil de usuario");
 
   return mapUserRecord(data);
 }
@@ -79,3 +116,4 @@ export async function deleteUserByEmail(email) {
 
   return (data?.length ?? 0) > 0;
 }
+

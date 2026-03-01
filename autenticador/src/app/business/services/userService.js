@@ -10,6 +10,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const sanitizeUser = (user) => ({
   id: user.id,
+  authUserId: user.authUserId ?? null,
   name: user.name,
   email: user.email,
   role: user.role ?? "user",
@@ -34,10 +35,10 @@ export async function getManagedUsers() {
   }
 }
 
-export async function createManagedUser({ name, email, password }) {
+export async function createManagedUser({ name, email, role = "user" }) {
   await sleep(500);
 
-  if (!name || !email || !password) {
+  if (!name || !email) {
     return { success: false, message: "Campo obligatorio" };
   }
 
@@ -47,38 +48,32 @@ export async function createManagedUser({ name, email, password }) {
     return { success: false, message: "Correo invalido." };
   }
 
-  if (password.length < 6) {
-    return {
-      success: false,
-      message: "La contrasena debe tener al menos 6 caracteres.",
-    };
-  }
-
   try {
     const exists = await getUserByEmail(normalizedEmail);
 
     if (exists) {
       return {
         success: false,
-        message: "Ya existe una cuenta con ese correo.",
+        message: "Ya existe un perfil con ese correo.",
       };
     }
 
     const created = await createUser({
       name: name.trim(),
       email: normalizedEmail,
-      password,
+      role,
+      authUserId: null,
     });
 
     return {
       success: true,
-      message: "Usuario creado correctamente.",
+      message: "Perfil creado correctamente.",
       user: sanitizeUser(created),
     };
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible crear el usuario."),
+      message: getErrorMessage(error, "No fue posible crear el perfil."),
     };
   }
 }
@@ -102,18 +97,19 @@ export async function removeManagedUser({ email, currentUserEmail }) {
     if (!removed) {
       return {
         success: false,
-        message: "No fue posible eliminar el usuario.",
+        message: "No fue posible eliminar el perfil.",
       };
     }
 
     return {
       success: true,
-      message: "Usuario eliminado correctamente.",
+      message: "Perfil eliminado correctamente.",
     };
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible eliminar el usuario."),
+      message: getErrorMessage(error, "No fue posible eliminar el perfil."),
     };
   }
 }
+

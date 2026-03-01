@@ -51,28 +51,12 @@ function UsersSection({
           ) : null}
         </div>
 
-        <div>
-          <input
-            type="password"
-            placeholder="Contrasena"
-            value={userForm.password}
-            onChange={(event) => onUserChange("password", event.target.value)}
-            disabled={isSavingUser}
-            className={`${inputClass} ${
-              userErrors.password ? "border-[#a4262c]" : "border-[#e1e1e1]"
-            }`}
-          />
-          {userErrors.password ? (
-            <p className="mt-1 text-[12px] text-[#a4262c]">{userErrors.password}</p>
-          ) : null}
-        </div>
-
         <button
           type="submit"
           disabled={isSavingUser}
           className="h-10 w-full rounded-[2px] bg-[#0078D4] px-4 text-[14px] font-medium text-white transition hover:bg-[#106ebe] disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isSavingUser ? "Guardando..." : "Agregar usuario"}
+          {isSavingUser ? "Guardando..." : "Agregar perfil"}
         </button>
       </form>
 
