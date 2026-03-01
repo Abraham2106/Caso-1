@@ -14,36 +14,41 @@ function RootRedirect() {
   return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 }
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootRedirect />,
+    },
+    {
+      path: "/login",
+      element: <LoginPage />,
+    },
+    {
+      path: "/register",
+      element: <RegisterPage />,
+    },
+    {
+      path: "/forgot-password",
+      element: <ForgotPasswordPage />,
+    },
+    {
+      path: "/dashboard",
+      element: (
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "*",
+      element: <Navigate to="/" replace />,
+    },
+  ],
   {
-    path: "/",
-    element: <RootRedirect />,
+    basename: import.meta.env.BASE_URL,
   },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/register",
-    element: <RegisterPage />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <DashboardPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "*",
-    element: <Navigate to="/" replace />,
-  },
-]);
+);
 
 export default router;
 
