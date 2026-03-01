@@ -1,33 +1,37 @@
-﻿const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+﻿import { pingDatabase } from "../../data/repositories/healthRepository";
 
-export function getInternetInfo() {
-  const nav = typeof window !== "undefined" ? window.navigator : undefined;
-  const connection = nav?.connection || nav?.mozConnection || nav?.webkitConnection;
+const now = () =>
+  typeof performance !== "undefined" && performance.now
+    ? performance.now()
+    : Date.now();
+
+export async function checkSystemHealth() {
+  const startedAt = now();
+  const { usersPing, dataPing } = await pingDatabase();
+  const latencyMs = Math.round(now() - startedAt);
+  const checkedAt = new Date().toISOString();
+
+  const usersError = usersPing.error;
+  const dataError = dataPing.error;
+
+  if (usersError || dataError) {
+    return {
+      success: false,
+      checkedAt,
+      latencyMs,
+      message: "Fallo el ping a la base de datos.",
+      detail: usersError?.message ?? dataError?.message ?? "Sin detalle.",
+    };
+  }
 
   return {
-    isOnline: nav ? nav.onLine : false,
-    effectiveType: connection?.effectiveType ?? "No disponible",
-    downlink: connection?.downlink ?? null,
-    rtt: connection?.rtt ?? null,
-  };
-}
-
-export async function checkInternetConnectivity() {
-  const startedAt = Date.now();
-  await sleep(400);
-
-  const snapshot = getInternetInfo();
-  const elapsed = Date.now() - startedAt;
-  const jitter = Math.floor(Math.random() * 40) + 20;
-  const latencyMs = snapshot.isOnline ? elapsed + jitter : null;
-
-  return {
-    success: snapshot.isOnline,
-    checkedAt: new Date().toISOString(),
+    success: true,
+    checkedAt,
     latencyMs,
-    snapshot,
-    message: snapshot.isOnline
-      ? "Conectividad establecida correctamente."
-      : "No hay conexion activa a internet.",
+    message: "Base de datos operativa.",
+    stats: {
+      users: usersPing.count ?? 0,
+      dataRecords: dataPing.count ?? 0,
+    },
   };
 }
