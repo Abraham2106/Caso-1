@@ -103,3 +103,9 @@ npm run dev
 npm run build
 npm run deploy
 ```
+
+## 12. Variables de entorno
+- `.env`: desarrollo local (`npm run dev`).
+- `.env.production`: build de produccion (`npm run build` y GitHub Pages).
+
+Si GitHub Pages apunta a otra base, revise que el build publicado use los valores de `.env.production`.
