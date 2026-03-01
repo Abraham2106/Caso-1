@@ -1,13 +1,11 @@
 ﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import AuthCard from "../components/auth/AuthCard";
+import AuthField from "../components/auth/AuthField";
 import { useAuth } from "../contexts/AuthContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const baseInputClass =
-  "h-10 w-full rounded-[2px] border px-3 text-[14px] text-[#323130] placeholder:text-[#605e5c] outline-none transition focus:border-[#0078D4] focus:ring-1 focus:ring-[#0078D4] disabled:bg-[#f3f3f3]";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -16,6 +14,13 @@ function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((current) => ({ ...current, [name]: value }));
+    setErrors((current) => ({ ...current, [name]: "" }));
+  };
 
   const validateForm = () => {
     const nextErrors = { email: "", password: "" };
@@ -31,13 +36,6 @@ function LoginPage() {
     }
 
     return nextErrors;
-  };
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: "" }));
   };
 
   const handleSubmit = async (event) => {
@@ -65,93 +63,54 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md rounded-[2px] border border-[#e1e1e1] bg-white p-8">
-        <h1 className="mb-1 text-[24px] font-semibold text-[#323130]">
-          Iniciar sesion
-        </h1>
-        <p className="mb-6 text-[14px] text-[#605e5c]">
-          Acceda con su cuenta para continuar.
-        </p>
+    <AuthCard title="Iniciar sesion" subtitle="Acceda con su cuenta para continuar.">
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        <AuthField
+          id="email"
+          name="email"
+          type="email"
+          label="Correo electronico"
+          value={formData.email}
+          onChange={handleChange}
+          error={errors.email}
+          disabled={isLoading}
+          autoComplete="email"
+        />
 
-        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-1 block text-[14px] font-medium text-[#323130]"
-            >
-              Correo electronico
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={isLoading}
-              className={`${baseInputClass} ${
-                errors.email ? "border-[#a4262c]" : "border-[#e1e1e1]"
-              }`}
-              autoComplete="email"
-            />
-            {errors.email && (
-              <p className="mt-1 flex items-center gap-1 text-[12px] text-[#a4262c]">
-                <AlertCircle size={14} />
-                {errors.email}
-              </p>
-            )}
-          </div>
+        <AuthField
+          id="password"
+          name="password"
+          type="password"
+          label="Contrasena"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+          disabled={isLoading}
+          autoComplete="current-password"
+        />
 
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-[14px] font-medium text-[#323130]"
-            >
-              Contrasena
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={isLoading}
-              className={`${baseInputClass} ${
-                errors.password ? "border-[#a4262c]" : "border-[#e1e1e1]"
-              }`}
-              autoComplete="current-password"
-            />
-            {errors.password && (
-              <p className="mt-1 flex items-center gap-1 text-[12px] text-[#a4262c]">
-                <AlertCircle size={14} />
-                {errors.password}
-              </p>
-            )}
-          </div>
-
-          <div className="text-right">
-            <Link to="/forgot-password" className="text-[14px] text-[#0078D4]">
-              ¿Olvidó su contraseña?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="h-10 w-full rounded-[2px] bg-[#0078D4] px-4 text-[14px] font-medium text-white transition hover:bg-[#106ebe] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isLoading ? "Iniciando sesion..." : "Iniciar sesion"}
-          </button>
-        </form>
-
-        <div className="mt-6 border-t border-[#e1e1e1] pt-4 text-center text-[14px] text-[#605e5c]">
-          ¿No tiene cuenta?{" "}
-          <Link to="/register" className="text-[#0078D4]">
-            Registrarse
+        <div className="text-right">
+          <Link to="/forgot-password" className="text-[14px] text-[#0078D4]">
+            ¿Olvido su contrasena?
           </Link>
         </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="h-10 w-full rounded-[2px] bg-[#0078D4] px-4 text-[14px] font-medium text-white transition hover:bg-[#106ebe] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isLoading ? "Iniciando sesion..." : "Iniciar sesion"}
+        </button>
+      </form>
+
+      <div className="mt-6 border-t border-[#e1e1e1] pt-4 text-center text-[14px] text-[#605e5c]">
+        ¿No tiene cuenta?{" "}
+        <Link to="/register" className="text-[#0078D4]">
+          Registrarse
+        </Link>
       </div>
-    </div>
+    </AuthCard>
   );
 }
 
