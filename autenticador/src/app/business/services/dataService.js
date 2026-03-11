@@ -1,19 +1,9 @@
-﻿import {
+import {
   createDataRecord,
   deleteDataRecord,
   listDataRecords,
   updateDataRecord,
 } from "../../data/repositories/dataRepository";
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function getErrorMessage(error, fallback) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
-}
 
 export async function getManagedDataRecords() {
   try {
@@ -25,8 +15,6 @@ export async function getManagedDataRecords() {
 }
 
 export async function createManagedDataRecord({ key, value }) {
-  await sleep(350);
-
   if (!key || !value) {
     return { success: false, message: "Campo obligatorio" };
   }
@@ -45,14 +33,12 @@ export async function createManagedDataRecord({ key, value }) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible registrar el dato."),
+      message: error?.message || "No fue posible registrar el dato.",
     };
   }
 }
 
 export async function updateManagedDataRecord({ id, key, value }) {
-  await sleep(350);
-
   if (!key || !value) {
     return { success: false, message: "Campo obligatorio" };
   }
@@ -76,14 +62,12 @@ export async function updateManagedDataRecord({ id, key, value }) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible actualizar el dato."),
+      message: error?.message || "No fue posible actualizar el dato.",
     };
   }
 }
 
 export async function removeManagedDataRecord(id) {
-  await sleep(250);
-
   try {
     const removed = await deleteDataRecord(id);
 
@@ -95,7 +79,7 @@ export async function removeManagedDataRecord(id) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible eliminar el dato."),
+      message: error?.message || "No fue posible eliminar el dato.",
     };
   }
 }

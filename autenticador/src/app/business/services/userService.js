@@ -8,48 +8,24 @@ import {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 const DEFAULT_MANAGED_USER_PASSWORD = "temporal123";
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const sanitizeUser = (user) => ({
-  id: user.id,
-  username: user.username ?? "",
-  name: user.name,
-  email: user.email,
-  role: user.role ?? "user",
-  createdAt: user.createdAt,
-});
+async function resolveUsername(email) {
+  const base =
+    (email.split("@")[0] ?? "")
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, "")
+      .slice(0, 24) || "usuario";
 
-function getErrorMessage(error, fallback) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
+  let candidate = base;
 
-  return fallback;
-}
-
-function buildBaseUsername(email) {
-  const localPart = email.split("@")[0] ?? "";
-  const normalized = localPart
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "")
-    .slice(0, 24);
-
-  return normalized || "usuario";
-}
-
-async function resolveAvailableUsername(baseUsername) {
-  let candidate = baseUsername;
-  let suffix = 1;
-
-  while (suffix <= 1000) {
+  for (let index = 1; index <= 1000; index += 1) {
     const existing = await getUserByUsername(candidate);
 
     if (!existing) {
       return candidate;
     }
 
-    candidate = `${baseUsername}${suffix}`;
-    suffix += 1;
+    candidate = `${base}${index}`;
   }
 
   throw new Error("No fue posible generar un nombre de usuario disponible.");
@@ -57,8 +33,7 @@ async function resolveAvailableUsername(baseUsername) {
 
 export async function getManagedUsers() {
   try {
-    const users = await listUsers();
-    return users.map(sanitizeUser);
+    return await listUsers();
   } catch (error) {
     console.error(error);
     return [];
@@ -66,8 +41,6 @@ export async function getManagedUsers() {
 }
 
 export async function createManagedUser({ name, email, role = "user" }) {
-  await sleep(500);
-
   if (!name || !email) {
     return { success: false, message: "Campo obligatorio" };
   }
@@ -88,9 +61,7 @@ export async function createManagedUser({ name, email, role = "user" }) {
       };
     }
 
-    const username = await resolveAvailableUsername(
-      buildBaseUsername(normalizedEmail),
-    );
+    const username = await resolveUsername(normalizedEmail);
 
     const created = await createUser({
       name: name.trim(),
@@ -103,19 +74,17 @@ export async function createManagedUser({ name, email, role = "user" }) {
     return {
       success: true,
       message: `Perfil creado correctamente. Usuario: ${username}, clave temporal: ${DEFAULT_MANAGED_USER_PASSWORD}.`,
-      user: sanitizeUser(created),
+      user: created,
     };
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible crear el perfil."),
+      message: error?.message || "No fue posible crear el perfil.",
     };
   }
 }
 
 export async function removeManagedUser({ email, currentUserEmail }) {
-  await sleep(300);
-
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedCurrent = currentUserEmail?.trim().toLowerCase();
 
@@ -143,8 +112,7 @@ export async function removeManagedUser({ email, currentUserEmail }) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible eliminar el perfil."),
+      message: error?.message || "No fue posible eliminar el perfil.",
     };
   }
 }
-

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Stethoscope, User, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -23,19 +23,15 @@ function DashboardPage() {
 
   const isAdmin = user?.role === "admin";
 
-  const navItems = useMemo(() => {
-    const baseItems = [{ id: "account", label: "Mi cuenta", icon: User }];
-
-    if (!isAdmin) {
-      return baseItems;
-    }
-
-    return [
-      ...baseItems,
-      { id: "users", label: "Gestion de usuarios", icon: UserPlus },
-      { id: "health", label: "Salud del sistema", icon: Stethoscope },
-    ];
-  }, [isAdmin]);
+  const navItems = [
+    { id: "account", label: "Mi cuenta", icon: User },
+    ...(isAdmin
+      ? [
+          { id: "users", label: "Gestion de usuarios", icon: UserPlus },
+          { id: "health", label: "Salud del sistema", icon: Stethoscope },
+        ]
+      : []),
+  ];
 
   const [activeSection, setActiveSection] = useState("account");
   const effectiveSection = navItems.some((item) => item.id === activeSection)
@@ -72,26 +68,23 @@ function DashboardPage() {
     setUserErrors((current) => ({ ...current, [field]: "" }));
   };
 
-  const validateUserForm = () => {
-    const nextErrors = { name: "", email: "" };
-
-    if (!userForm.name.trim()) {
-      nextErrors.name = "Campo obligatorio";
-    }
-
-    if (!userForm.email.trim()) {
-      nextErrors.email = "Campo obligatorio";
-    } else if (!EMAIL_REGEX.test(userForm.email.trim())) {
-      nextErrors.email = "Correo invalido";
-    }
-
-    return nextErrors;
-  };
-
   const handleCreateUser = async (event) => {
     event.preventDefault();
 
-    const nextErrors = validateUserForm();
+    const nextErrors = { name: "", email: "" };
+    const nameValue = userForm.name.trim();
+    const emailValue = userForm.email.trim();
+
+    if (!nameValue) {
+      nextErrors.name = "Campo obligatorio";
+    }
+
+    if (!emailValue) {
+      nextErrors.email = "Campo obligatorio";
+    } else if (!EMAIL_REGEX.test(emailValue)) {
+      nextErrors.email = "Correo invalido";
+    }
+
     setUserErrors(nextErrors);
 
     if (Object.values(nextErrors).some(Boolean)) {
@@ -100,7 +93,7 @@ function DashboardPage() {
     }
 
     setIsSavingUser(true);
-    const result = await createUserAccount(userForm);
+    const result = await createUserAccount({ name: nameValue, email: emailValue });
     setIsSavingUser(false);
 
     if (!result.success) {
@@ -138,34 +131,30 @@ function DashboardPage() {
     toast.success(`${result.message} Latencia: ${result.latencyMs} ms.`);
   };
 
-  const renderActiveSection = () => {
-    if (effectiveSection === "users" && isAdmin) {
-      return (
-        <UsersSection
-          user={user}
-          users={users}
-          userForm={userForm}
-          userErrors={userErrors}
-          isSavingUser={isSavingUser}
-          onUserChange={handleUserChange}
-          onCreateUser={handleCreateUser}
-          onDeleteUser={handleDeleteUser}
-        />
-      );
-    }
+  let activeView = <AccountSection user={user} isAdmin={isAdmin} />;
 
-    if (effectiveSection === "health" && isAdmin) {
-      return (
-        <HealthSection
-          healthResult={healthResult}
-          isCheckingHealth={isCheckingHealth}
-          onCheckHealth={handleCheckHealth}
-        />
-      );
-    }
-
-    return <AccountSection user={user} isAdmin={isAdmin} />;
-  };
+  if (effectiveSection === "users" && isAdmin) {
+    activeView = (
+      <UsersSection
+        user={user}
+        users={users}
+        userForm={userForm}
+        userErrors={userErrors}
+        isSavingUser={isSavingUser}
+        onUserChange={handleUserChange}
+        onCreateUser={handleCreateUser}
+        onDeleteUser={handleDeleteUser}
+      />
+    );
+  } else if (effectiveSection === "health" && isAdmin) {
+    activeView = (
+      <HealthSection
+        healthResult={healthResult}
+        isCheckingHealth={isCheckingHealth}
+        onCheckHealth={handleCheckHealth}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f3f3f3]">
@@ -190,7 +179,7 @@ function DashboardPage() {
             activeSection={effectiveSection}
             onSelect={setActiveSection}
           />
-          <section>{renderActiveSection()}</section>
+          <section>{activeView}</section>
         </div>
       </main>
     </div>

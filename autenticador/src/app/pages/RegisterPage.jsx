@@ -29,46 +29,6 @@ function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateForm = () => {
-    const nextErrors = {
-      name: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    };
-
-    if (!formData.name.trim()) {
-      nextErrors.name = "Campo obligatorio";
-    }
-
-    if (!formData.username.trim()) {
-      nextErrors.username = "Campo obligatorio";
-    } else if (!/^[a-zA-Z0-9._-]{3,30}$/.test(formData.username.trim())) {
-      nextErrors.username = "Usuario invalido";
-    }
-
-    if (!formData.email.trim()) {
-      nextErrors.email = "Campo obligatorio";
-    } else if (!EMAIL_REGEX.test(formData.email.trim())) {
-      nextErrors.email = "Correo invalido";
-    }
-
-    if (!formData.password.trim()) {
-      nextErrors.password = "Campo obligatorio";
-    } else if (formData.password.length < 6) {
-      nextErrors.password = "Minimo 6 caracteres";
-    }
-
-    if (!formData.confirmPassword.trim()) {
-      nextErrors.confirmPassword = "Campo obligatorio";
-    } else if (formData.password !== formData.confirmPassword) {
-      nextErrors.confirmPassword = "Las contrasenas no coinciden";
-    }
-
-    return nextErrors;
-  };
-
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -79,7 +39,47 @@ function RegisterPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const nextErrors = validateForm();
+    const nextErrors = {
+      name: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+    const nameValue = formData.name.trim();
+    const usernameValue = formData.username.trim();
+    const emailValue = formData.email.trim();
+    const passwordValue = formData.password;
+    const confirmValue = formData.confirmPassword;
+
+    if (!nameValue) {
+      nextErrors.name = "Campo obligatorio";
+    }
+
+    if (!usernameValue) {
+      nextErrors.username = "Campo obligatorio";
+    } else if (!/^[a-zA-Z0-9._-]{3,30}$/.test(usernameValue)) {
+      nextErrors.username = "Usuario invalido";
+    }
+
+    if (!emailValue) {
+      nextErrors.email = "Campo obligatorio";
+    } else if (!EMAIL_REGEX.test(emailValue)) {
+      nextErrors.email = "Correo invalido";
+    }
+
+    if (!passwordValue.trim()) {
+      nextErrors.password = "Campo obligatorio";
+    } else if (passwordValue.length < 6) {
+      nextErrors.password = "Minimo 6 caracteres";
+    }
+
+    if (!confirmValue.trim()) {
+      nextErrors.confirmPassword = "Campo obligatorio";
+    } else if (passwordValue !== confirmValue) {
+      nextErrors.confirmPassword = "Las contrasenas no coinciden";
+    }
+
     setErrors(nextErrors);
 
     if (Object.values(nextErrors).some(Boolean)) {
@@ -88,7 +88,13 @@ function RegisterPage() {
     }
 
     setIsLoading(true);
-    const result = await register(formData);
+    const result = await register({
+      name: nameValue,
+      username: usernameValue,
+      email: emailValue,
+      password: passwordValue,
+      confirmPassword: confirmValue,
+    });
     setIsLoading(false);
 
     if (!result.success) {

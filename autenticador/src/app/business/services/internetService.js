@@ -1,14 +1,9 @@
-﻿import { pingDatabase } from "../../data/repositories/healthRepository";
-
-const now = () =>
-  typeof performance !== "undefined" && performance.now
-    ? performance.now()
-    : Date.now();
+import { pingDatabase } from "../../data/repositories/healthRepository";
 
 export async function checkSystemHealth() {
-  const startedAt = now();
+  const startedAt = Date.now();
   const { usersPing, dataPing } = await pingDatabase();
-  const latencyMs = Math.round(now() - startedAt);
+  const latencyMs = Math.round(Date.now() - startedAt);
   const checkedAt = new Date().toISOString();
 
   const usersError = usersPing.error;
