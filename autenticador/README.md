@@ -87,8 +87,8 @@ Ejecutable en la nube:
 - https://abraham2106.github.io/Caso-1/
 
 ## 9. Equipo de desarrollo (2 desarrolladores)
-- Desarrollador 1: Abraham Gerardo Solano Parrales
-- Desarrollador 2: 
+- Abraham Gerardo Solano Parrales
+- Roberth Rojas Quesada
 
 ---
 
@@ -107,5 +107,3 @@ npm run deploy
 ## 12. Variables de entorno
 - `.env`: desarrollo local (`npm run dev`).
 - `.env.production`: build de produccion (`npm run build` y GitHub Pages).
-
-Si GitHub Pages apunta a otra base, revise que el build publicado use los valores de `.env.production`.
