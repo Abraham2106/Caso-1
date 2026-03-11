@@ -1,10 +1,9 @@
-﻿import { Layers, Mail, Shield, User } from "lucide-react";
-import { sectionCardClass } from "./dashboardStyles";
+import { Layers, Mail, Shield, User } from "lucide-react";
 
 function AccountSection({ user, isAdmin }) {
   return (
     <div className="space-y-6">
-      <section className={sectionCardClass}>
+      <section className="rounded-[2px] border border-[#e1e1e1] bg-white p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-[2px] bg-[#0078D4]">
             <Shield size={18} className="text-white" />
@@ -45,7 +44,7 @@ function AccountSection({ user, isAdmin }) {
       </section>
 
       {isAdmin ? (
-        <section className={sectionCardClass}>
+        <section className="rounded-[2px] border border-[#e1e1e1] bg-white p-6">
           <div className="mb-4 flex items-center gap-2">
             <Layers size={16} className="text-[#0078D4]" />
             <h3 className="text-[16px] font-semibold text-[#323130]">Arquitectura en 3 capas</h3>

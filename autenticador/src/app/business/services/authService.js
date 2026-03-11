@@ -10,172 +10,32 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
 const USERNAME_REGEX = /^[a-z0-9._-]{3,30}$/;
 const SESSION_STORAGE_KEY = "app_auth_user";
 const PASSWORD_RESET_EMAIL_KEY = "app_password_reset_email";
+const storage = typeof window !== "undefined" ? window.localStorage : null;
 
-export const RESET_PASSWORD_GENERIC_MESSAGE =
-  "Si el correo existe, enviamos instrucciones.";
-
-const SIGN_IN_FAILED_MESSAGE = "Credenciales invalidas. Verifique sus datos.";
-
-function getErrorMessage(error, fallback) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
-}
-
-function sanitizeUser(user) {
-  if (!user) {
-    return null;
-  }
-
-  return {
-    id: user.id,
-    username: user.username,
-    name: user.name,
-    email: user.email,
-    role: user.role ?? "user",
-    createdAt: user.createdAt ?? null,
-  };
-}
-
-function getStorage() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return window.localStorage;
-}
-
-function persistSessionUser(user) {
-  const storage = getStorage();
-
-  if (!storage) {
-    return;
-  }
-
-  storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
-}
-
-function clearSessionUser() {
-  const storage = getStorage();
-
-  if (!storage) {
-    return;
-  }
-
-  storage.removeItem(SESSION_STORAGE_KEY);
-}
-
-function readSessionUser() {
-  const storage = getStorage();
-
+const getStoredUser = () => {
   if (!storage) {
     return null;
   }
 
   const raw = storage.getItem(SESSION_STORAGE_KEY);
 
-  if (!raw) {
-    return null;
-  }
-
   try {
-    return JSON.parse(raw);
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
-}
+};
 
-function persistPasswordResetEmail(email) {
-  const storage = getStorage();
-
+const setStoredUser = (user) => {
   if (!storage) {
     return;
   }
 
-  storage.setItem(PASSWORD_RESET_EMAIL_KEY, email);
-}
-
-function readPasswordResetEmail() {
-  const storage = getStorage();
-
-  if (!storage) {
-    return "";
-  }
-
-  return storage.getItem(PASSWORD_RESET_EMAIL_KEY) ?? "";
-}
-
-function clearPasswordResetEmail() {
-  const storage = getStorage();
-
-  if (!storage) {
-    return;
-  }
-
-  storage.removeItem(PASSWORD_RESET_EMAIL_KEY);
-}
-
-function resolveEmailVerificationRedirectUrl() {
-  const publicUrl = import.meta.env.VITE_PUBLIC_URL;
-  const basePath = import.meta.env.BASE_URL ?? "/";
-  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-  const fallbackBaseUrl =
-    typeof window !== "undefined" ? window.location.origin : "";
-  const baseUrl = publicUrl || fallbackBaseUrl;
-
-  if (!baseUrl) {
-    return undefined;
-  }
-
-  return `${baseUrl}${normalizedBase}login`;
-}
-
-function resolveUsername({ providedUsername, email }) {
-  if (providedUsername?.trim()) {
-    return providedUsername.trim().toLowerCase();
-  }
-
-  if (!email.includes("@")) {
-    return "";
-  }
-
-  return email.split("@")[0].trim().toLowerCase();
-}
-
-function isAuthAlreadyRegisteredError(error) {
-  const message = error?.message ?? "";
-
-  return (
-    message.includes("already registered") || message.includes("already exists")
-  );
-}
-
-export async function syncProfileWithAuthUser(authUser) {
-  const normalizedEmail = authUser?.email?.trim().toLowerCase();
-
-  if (!normalizedEmail) {
-    throw new Error("No se pudo obtener informacion de la cuenta.");
-  }
-
-  const existing = await getUserByEmail(normalizedEmail);
-
-  if (!existing) {
-    throw new Error("No existe perfil para el correo autenticado.");
-  }
-
-  const profile = sanitizeUser(existing);
-  persistSessionUser(profile);
-  return profile;
-}
+  storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+};
 
 export async function getCurrentAuthenticatedUser() {
-  return readSessionUser();
-}
-
-export function subscribeToAuthState() {
-  return () => {};
+  return getStoredUser();
 }
 
 export async function loginUser({ email, password }) {
@@ -192,12 +52,12 @@ export async function loginUser({ email, password }) {
     if (!matchedUser || matchedUser.password !== password) {
       return {
         success: false,
-        message: SIGN_IN_FAILED_MESSAGE,
+        message: "Credenciales invalidas. Verifique sus datos.",
       };
     }
 
-    const profile = sanitizeUser(matchedUser);
-    persistSessionUser(profile);
+    const { password: _password, ...profile } = matchedUser;
+    setStoredUser(profile);
 
     return {
       success: true,
@@ -207,7 +67,7 @@ export async function loginUser({ email, password }) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible iniciar sesion."),
+      message: error?.message || "No fue posible iniciar sesion.",
     };
   }
 }
@@ -224,10 +84,9 @@ export async function registerUser({
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedUsername = resolveUsername({
-    providedUsername: username,
-    email: normalizedEmail,
-  });
+  const normalizedUsername = (username?.trim() || normalizedEmail.split("@")[0] || "")
+    .trim()
+    .toLowerCase();
 
   if (!EMAIL_REGEX.test(normalizedEmail)) {
     return { success: false, message: "Correo invalido." };
@@ -280,7 +139,13 @@ export async function registerUser({
     });
 
     let message = "Cuenta creada correctamente.";
-    const emailRedirectTo = resolveEmailVerificationRedirectUrl();
+    const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+    const basePath = import.meta.env.BASE_URL ?? "/";
+    const baseUrl =
+      publicUrl || (typeof window !== "undefined" ? window.location.origin : "");
+    const emailRedirectTo = baseUrl
+      ? `${baseUrl}${basePath.endsWith("/") ? basePath : `${basePath}/`}login`
+      : undefined;
 
     const { error: authError } = await supabase.auth.signUp({
       email: normalizedEmail,
@@ -294,16 +159,20 @@ export async function registerUser({
     });
 
     if (authError) {
-      if (!isAuthAlreadyRegisteredError(authError)) {
-        message =
-          "Cuenta creada, pero no se pudo enviar correo de confirmacion.";
+      const authMessage = authError.message ?? "";
+
+      if (
+        !authMessage.includes("already registered") &&
+        !authMessage.includes("already exists")
+      ) {
+        message = "Cuenta creada, pero no se pudo enviar correo de confirmacion.";
       }
     } else {
       message = "Cuenta creada. Revise su correo para confirmar el acceso.";
     }
 
-    const profile = sanitizeUser(created);
-    persistSessionUser(profile);
+    const profile = created;
+    setStoredUser(profile);
 
     return {
       success: true,
@@ -313,13 +182,13 @@ export async function registerUser({
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(error, "No fue posible registrar la cuenta."),
+      message: error?.message || "No fue posible registrar la cuenta.",
     };
   }
 }
 
 export async function logoutUser() {
-  clearSessionUser();
+  storage?.removeItem(SESSION_STORAGE_KEY);
 
   try {
     await supabase.auth.signOut();
@@ -353,7 +222,7 @@ export async function sendPasswordResetEmail({ email, redirectTo }) {
       };
     }
 
-    persistPasswordResetEmail(normalizedEmail);
+    storage?.setItem(PASSWORD_RESET_EMAIL_KEY, normalizedEmail);
 
     const { error } = await supabase.auth.resetPasswordForEmail(
       normalizedEmail,
@@ -368,15 +237,14 @@ export async function sendPasswordResetEmail({ email, redirectTo }) {
 
     return {
       success: true,
-      message: RESET_PASSWORD_GENERIC_MESSAGE,
+      message: "Si el correo existe, enviamos instrucciones.",
     };
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(
-        error,
+      message:
+        error?.message ||
         "No fue posible procesar la solicitud de recuperacion.",
-      ),
     };
   }
 }
@@ -390,7 +258,7 @@ export async function updateCurrentUserPassword(password) {
   }
 
   try {
-    let targetEmail = readSessionUser()?.email?.trim().toLowerCase() ?? "";
+    let targetEmail = getStoredUser()?.email?.trim().toLowerCase() ?? "";
 
     const { data: sessionData } = await supabase.auth.getSession();
     const authEmail = sessionData.session?.user?.email?.trim().toLowerCase() ?? "";
@@ -403,10 +271,9 @@ export async function updateCurrentUserPassword(password) {
       if (authError) {
         return {
           success: false,
-          message: getErrorMessage(
-            authError,
+          message:
+            authError?.message ||
             "No fue posible actualizar la contrasena desde el enlace de correo.",
-          ),
         };
       }
 
@@ -414,7 +281,8 @@ export async function updateCurrentUserPassword(password) {
     }
 
     if (!targetEmail) {
-      targetEmail = readPasswordResetEmail().trim().toLowerCase();
+      targetEmail =
+        storage?.getItem(PASSWORD_RESET_EMAIL_KEY)?.trim().toLowerCase() ?? "";
     }
 
     if (!targetEmail) {
@@ -426,7 +294,7 @@ export async function updateCurrentUserPassword(password) {
     }
 
     await updateUserPasswordByEmail(targetEmail, password);
-    clearPasswordResetEmail();
+    storage?.removeItem(PASSWORD_RESET_EMAIL_KEY);
 
     return {
       success: true,
@@ -435,10 +303,9 @@ export async function updateCurrentUserPassword(password) {
   } catch (error) {
     return {
       success: false,
-      message: getErrorMessage(
-        error,
+      message:
+        error?.message ||
         "No fue posible actualizar la contrasena. Solicite un nuevo enlace.",
-      ),
     };
   }
 }

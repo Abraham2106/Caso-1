@@ -1,12 +1,11 @@
-﻿import { ChevronRight } from "lucide-react";
-import { sectionCardClass } from "./dashboardStyles";
+import { ChevronRight } from "lucide-react";
 
 function DashboardSidebar({ user, navItems, activeSection, onSelect }) {
   const initials = (user?.name ?? "U").trim().charAt(0).toUpperCase() || "U";
 
   return (
     <aside className="space-y-4">
-      <section className={sectionCardClass}>
+      <section className="rounded-[2px] border border-[#e1e1e1] bg-white p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d2b9a6] text-[22px] font-semibold text-[#323130]">
             {initials}
@@ -18,7 +17,7 @@ function DashboardSidebar({ user, navItems, activeSection, onSelect }) {
         </div>
       </section>
 
-      <section className={sectionCardClass}>
+      <section className="rounded-[2px] border border-[#e1e1e1] bg-white p-6">
         <h2 className="mb-3 text-[14px] font-semibold text-[#323130]">Navegacion</h2>
         <div className="space-y-1">
           {navItems.map((item) => {

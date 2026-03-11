@@ -29,28 +29,25 @@ function ResetPasswordPage() {
     setErrors((current) => ({ ...current, [name]: "" }));
   };
 
-  const validateForm = () => {
-    const nextErrors = { password: "", confirmPassword: "" };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    if (!formData.password.trim()) {
+    const nextErrors = { password: "", confirmPassword: "" };
+    const passwordValue = formData.password.trim();
+    const confirmValue = formData.confirmPassword.trim();
+
+    if (!passwordValue) {
       nextErrors.password = "Campo obligatorio";
-    } else if (formData.password.trim().length < 6) {
+    } else if (passwordValue.length < 6) {
       nextErrors.password = "Minimo 6 caracteres";
     }
 
-    if (!formData.confirmPassword.trim()) {
+    if (!confirmValue) {
       nextErrors.confirmPassword = "Campo obligatorio";
     } else if (formData.password !== formData.confirmPassword) {
       nextErrors.confirmPassword = "Las contrasenas no coinciden";
     }
 
-    return nextErrors;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const nextErrors = validateForm();
     setErrors(nextErrors);
 
     if (Object.values(nextErrors).some(Boolean)) {

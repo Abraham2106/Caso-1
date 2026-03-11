@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -7,7 +7,6 @@ import AuthField from "../components/auth/AuthField";
 import { useAuth } from "../contexts/AuthContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
-const GENERIC_MESSAGE = "Si el correo existe, enviamos instrucciones.";
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -18,30 +17,24 @@ function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const redirectTo = useMemo(() => {
-    const publicUrl = import.meta.env.VITE_PUBLIC_URL;
-    const basePath = import.meta.env.BASE_URL ?? "/";
-    const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-    const baseUrl = publicUrl || window.location.origin;
-    return `${baseUrl}${normalizedBase}reset-password`;
-  }, []);
-
-  const validateEmail = (value) => {
-    if (!value.trim()) {
-      return "Campo obligatorio";
-    }
-
-    if (!EMAIL_REGEX.test(value.trim())) {
-      return "Correo invalido";
-    }
-
-    return "";
-  };
+  const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+  const basePath = import.meta.env.BASE_URL ?? "/";
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  const baseUrl = publicUrl || window.location.origin;
+  const redirectTo = `${baseUrl}${normalizedBase}reset-password`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const validationError = validateEmail(email);
+    const emailValue = email.trim();
+    let validationError = "";
+
+    if (!emailValue) {
+      validationError = "Campo obligatorio";
+    } else if (!EMAIL_REGEX.test(emailValue)) {
+      validationError = "Correo invalido";
+    }
+
     setError(validationError);
 
     if (validationError) {
@@ -50,7 +43,7 @@ function ForgotPasswordPage() {
     }
 
     setIsLoading(true);
-    const result = await requestPasswordReset(email.trim(), redirectTo);
+    const result = await requestPasswordReset(emailValue, redirectTo);
     setIsLoading(false);
 
     if (!result.success) {
@@ -59,13 +52,7 @@ function ForgotPasswordPage() {
     }
 
     setIsSubmitted(true);
-    toast.success(result.message || GENERIC_MESSAGE);
-  };
-
-  const resetState = () => {
-    setEmail("");
-    setError("");
-    setIsSubmitted(false);
+    toast.success(result.message || "Si el correo existe, enviamos instrucciones.");
   };
 
   if (isSubmitted) {
@@ -77,12 +64,18 @@ function ForgotPasswordPage() {
           </div>
         </div>
 
-        <p className="mb-6 text-center text-[14px] text-[#605e5c]">{GENERIC_MESSAGE}</p>
+        <p className="mb-6 text-center text-[14px] text-[#605e5c]">
+          Si el correo existe, enviamos instrucciones.
+        </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={resetState}
+            onClick={() => {
+              setEmail("");
+              setError("");
+              setIsSubmitted(false);
+            }}
             className="h-10 flex-1 rounded-[2px] border border-[#e1e1e1] bg-white px-4 text-[14px] font-medium text-[#323130] transition hover:bg-[#f3f3f3]"
           >
             Usar otro correo

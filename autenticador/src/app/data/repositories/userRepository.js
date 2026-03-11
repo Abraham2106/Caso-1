@@ -4,13 +4,7 @@ const USERS_TABLE = "users";
 const USER_SELECT_SAFE = "id,username,name,email,role,created_at";
 const USER_SELECT_WITH_PASSWORD = "id,username,name,email,password,role,created_at";
 
-function ensureNoError(error, context) {
-  if (error) {
-    throw new Error(`${context}: ${error.message}`);
-  }
-}
-
-function mapUserRecord(record, includePassword = false) {
+const mapUser = (record, includePassword = false) => {
   if (!record) {
     return null;
   }
@@ -24,15 +18,8 @@ function mapUserRecord(record, includePassword = false) {
     createdAt: record.created_at ?? record.createdAt ?? null,
   };
 
-  if (!includePassword) {
-    return baseUser;
-  }
-
-  return {
-    ...baseUser,
-    password: record.password,
-  };
-}
+  return includePassword ? { ...baseUser, password: record.password } : baseUser;
+};
 
 export async function listUsers() {
   const { data, error } = await supabase
@@ -40,9 +27,11 @@ export async function listUsers() {
     .select(USER_SELECT_SAFE)
     .order("id", { ascending: true });
 
-  ensureNoError(error, "Error al consultar usuarios");
+  if (error) {
+    throw new Error(`Error al consultar usuarios: ${error.message}`);
+  }
 
-  return (data ?? []).map((record) => mapUserRecord(record));
+  return (data ?? []).map((record) => mapUser(record));
 }
 
 export async function getUserByEmail(email, options = {}) {
@@ -55,9 +44,11 @@ export async function getUserByEmail(email, options = {}) {
     .eq("email", normalizedEmail)
     .maybeSingle();
 
-  ensureNoError(error, "Error al consultar usuario por correo");
+  if (error) {
+    throw new Error(`Error al consultar usuario por correo: ${error.message}`);
+  }
 
-  return mapUserRecord(data, includePassword);
+  return mapUser(data, includePassword);
 }
 
 export async function getUserByUsername(username, options = {}) {
@@ -70,9 +61,13 @@ export async function getUserByUsername(username, options = {}) {
     .eq("username", normalizedUsername)
     .maybeSingle();
 
-  ensureNoError(error, "Error al consultar usuario por nombre de usuario");
+  if (error) {
+    throw new Error(
+      `Error al consultar usuario por nombre de usuario: ${error.message}`,
+    );
+  }
 
-  return mapUserRecord(data, includePassword);
+  return mapUser(data, includePassword);
 }
 
 export async function createUser({
@@ -97,9 +92,11 @@ export async function createUser({
     .select(USER_SELECT_SAFE)
     .maybeSingle();
 
-  ensureNoError(error, "Error al crear usuario");
+  if (error) {
+    throw new Error(`Error al crear usuario: ${error.message}`);
+  }
 
-  return mapUserRecord(data);
+  return mapUser(data);
 }
 
 export async function updateUserPasswordByEmail(email, password) {
@@ -114,9 +111,11 @@ export async function updateUserPasswordByEmail(email, password) {
     .select(USER_SELECT_SAFE)
     .maybeSingle();
 
-  ensureNoError(error, "Error al actualizar contrasena");
+  if (error) {
+    throw new Error(`Error al actualizar contrasena: ${error.message}`);
+  }
 
-  return mapUserRecord(data);
+  return mapUser(data);
 }
 
 export async function deleteUserByEmail(email) {
@@ -128,7 +127,9 @@ export async function deleteUserByEmail(email) {
     .eq("email", normalizedEmail)
     .select("id");
 
-  ensureNoError(error, "Error al eliminar usuario");
+  if (error) {
+    throw new Error(`Error al eliminar usuario: ${error.message}`);
+  }
 
   return (data?.length ?? 0) > 0;
 }

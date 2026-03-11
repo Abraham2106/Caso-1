@@ -22,35 +22,33 @@ function LoginPage() {
     setErrors((current) => ({ ...current, [name]: "" }));
   };
 
-  const validateForm = () => {
-    const nextErrors = { email: "", password: "" };
-
-    if (!formData.email.trim()) {
-      nextErrors.email = "Campo obligatorio";
-    } else if (!EMAIL_REGEX.test(formData.email.trim())) {
-      nextErrors.email = "Correo invalido";
-    }
-
-    if (!formData.password.trim()) {
-      nextErrors.password = "Campo obligatorio";
-    }
-
-    return nextErrors;
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const nextErrors = validateForm();
+    const nextErrors = { email: "", password: "" };
+    const emailValue = formData.email.trim();
+    const passwordValue = formData.password;
+    const passwordCheck = passwordValue.trim();
+
+    if (!emailValue) {
+      nextErrors.email = "Campo obligatorio";
+    } else if (!EMAIL_REGEX.test(emailValue)) {
+      nextErrors.email = "Correo invalido";
+    }
+
+    if (!passwordCheck) {
+      nextErrors.password = "Campo obligatorio";
+    }
+
     setErrors(nextErrors);
 
-    if (Object.values(nextErrors).some(Boolean)) {
+    if (nextErrors.email || nextErrors.password) {
       toast.error("Revise los campos marcados.");
       return;
     }
 
     setIsLoading(true);
-    const result = await login(formData.email.trim(), formData.password);
+    const result = await login(emailValue, passwordValue);
     setIsLoading(false);
 
     if (!result.success) {

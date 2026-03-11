@@ -1,21 +1,12 @@
-﻿/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-refresh/only-export-components */
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   getCurrentAuthenticatedUser,
   loginUser,
   logoutUser,
   registerUser,
   sendPasswordResetEmail,
-  subscribeToAuthState,
-  syncProfileWithAuthUser,
   updateCurrentUserPassword,
 } from "../business/services/authService";
 import {
@@ -38,69 +29,26 @@ export function AuthProvider({ children }) {
   const [managedData, setManagedData] = useState([]);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
-  const refreshUsers = useCallback(async () => {
-    const users = await getManagedUsers();
-    setManagedUsers(users);
-    return users;
-  }, []);
-
-  const refreshData = useCallback(async () => {
-    const dataRecords = await getManagedDataRecords();
-    setManagedData(dataRecords);
-    return dataRecords;
-  }, []);
-
-  const syncUserFromAuth = useCallback(
-    async (authUser = null) => {
-      try {
-        const profile = authUser
-          ? await syncProfileWithAuthUser(authUser)
-          : await getCurrentAuthenticatedUser();
-
-        setUser(profile);
-
-        if (profile) {
-          await refreshUsers();
-        }
-      } catch (error) {
-        console.error(error);
-        setUser(null);
-      }
-    },
-    [refreshUsers],
-  );
-
   useEffect(() => {
-    let isMounted = true;
-
     const bootstrap = async () => {
-      await Promise.all([refreshUsers(), refreshData()]);
-      await syncUserFromAuth();
+      const [users, dataItems] = await Promise.all([
+        getManagedUsers(),
+        getManagedDataRecords(),
+      ]);
 
-      if (!isMounted) {
-        return;
-      }
+      setManagedUsers(users);
+      setManagedData(dataItems);
 
+      const profile = await getCurrentAuthenticatedUser();
+
+      setUser(profile);
       setIsBootstrapping(false);
     };
 
-    const unsubscribe = subscribeToAuthState((authUser) => {
-      if (!isMounted) {
-        return;
-      }
-
-      syncUserFromAuth(authUser);
-    });
-
     bootstrap();
+  }, []);
 
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, [refreshData, refreshUsers, syncUserFromAuth]);
-
-  const login = useCallback(async (email, password) => {
+  const login = async (email, password) => {
     const result = await loginUser({ email, password });
 
     if (result.success && result.user) {
@@ -108,32 +56,35 @@ export function AuthProvider({ children }) {
     }
 
     return result;
-  }, []);
+  };
 
-  const register = useCallback(
-    async ({ name, username, email, password, confirmPassword }) => {
-      const result = await registerUser({
-        name,
-        username,
-        email,
-        password,
-        confirmPassword,
-      });
+  const register = async ({
+    name,
+    username,
+    email,
+    password,
+    confirmPassword,
+  }) => {
+    const result = await registerUser({
+      name,
+      username,
+      email,
+      password,
+      confirmPassword,
+    });
 
-      if (result.success) {
-        await refreshUsers();
-      }
+    if (result.success) {
+      setManagedUsers(await getManagedUsers());
+    }
 
-      if (result.success && result.user) {
-        setUser(result.user);
-      }
+    if (result.success && result.user) {
+      setUser(result.user);
+    }
 
-      return result;
-    },
-    [refreshUsers],
-  );
+    return result;
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     const result = await logoutUser();
 
     if (result.success) {
@@ -141,121 +92,89 @@ export function AuthProvider({ children }) {
     }
 
     return result;
-  }, []);
+  };
 
-  const requestPasswordReset = useCallback(async (email, redirectTo) => {
-    return sendPasswordResetEmail({ email, redirectTo });
-  }, []);
+  const requestPasswordReset = (email, redirectTo) =>
+    sendPasswordResetEmail({ email, redirectTo });
 
-  const updatePassword = useCallback(async (password) => {
-    return updateCurrentUserPassword(password);
-  }, []);
+  const updatePassword = (password) => updateCurrentUserPassword(password);
 
-  const createUserAccount = useCallback(
-    async ({ name, email, role }) => {
-      const result = await createManagedUser({ name, email, role });
+  const createUserAccount = async ({ name, email, role }) => {
+    const result = await createManagedUser({ name, email, role });
 
-      if (result.success) {
-        await refreshUsers();
-      }
+    if (result.success) {
+      setManagedUsers(await getManagedUsers());
+    }
 
-      return result;
-    },
-    [refreshUsers],
+    return result;
+  };
+
+  const deleteUserAccount = async (email) => {
+    const result = await removeManagedUser({
+      email,
+      currentUserEmail: user?.email ?? "",
+    });
+
+    if (result.success) {
+      setManagedUsers(await getManagedUsers());
+    }
+
+    return result;
+  };
+
+  const createDataItem = async ({ key, value }) => {
+    const result = await createManagedDataRecord({ key, value });
+
+    if (result.success) {
+      setManagedData(await getManagedDataRecords());
+    }
+
+    return result;
+  };
+
+  const updateDataItem = async ({ id, key, value }) => {
+    const result = await updateManagedDataRecord({ id, key, value });
+
+    if (result.success) {
+      setManagedData(await getManagedDataRecords());
+    }
+
+    return result;
+  };
+
+  const deleteDataItem = async (id) => {
+    const result = await removeManagedDataRecord(id);
+
+    if (result.success) {
+      setManagedData(await getManagedDataRecords());
+    }
+
+    return result;
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        users: managedUsers,
+        dataItems: managedData,
+        isBootstrapping,
+        isAuthenticated: Boolean(user),
+        login,
+        register,
+        logout,
+        requestPasswordReset,
+        updatePassword,
+        createUserAccount,
+        deleteUserAccount,
+        createDataItem,
+        updateDataItem,
+        deleteDataItem,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
-
-  const deleteUserAccount = useCallback(
-    async (email) => {
-      const result = await removeManagedUser({
-        email,
-        currentUserEmail: user?.email ?? "",
-      });
-
-      if (result.success) {
-        await refreshUsers();
-      }
-
-      return result;
-    },
-    [refreshUsers, user?.email],
-  );
-
-  const createDataItem = useCallback(
-    async ({ key, value }) => {
-      const result = await createManagedDataRecord({ key, value });
-
-      if (result.success) {
-        await refreshData();
-      }
-
-      return result;
-    },
-    [refreshData],
-  );
-
-  const updateDataItem = useCallback(
-    async ({ id, key, value }) => {
-      const result = await updateManagedDataRecord({ id, key, value });
-
-      if (result.success) {
-        await refreshData();
-      }
-
-      return result;
-    },
-    [refreshData],
-  );
-
-  const deleteDataItem = useCallback(
-    async (id) => {
-      const result = await removeManagedDataRecord(id);
-
-      if (result.success) {
-        await refreshData();
-      }
-
-      return result;
-    },
-    [refreshData],
-  );
-
-  const value = useMemo(
-    () => ({
-      user,
-      users: managedUsers,
-      dataItems: managedData,
-      isBootstrapping,
-      isAuthenticated: Boolean(user),
-      login,
-      register,
-      logout,
-      requestPasswordReset,
-      updatePassword,
-      createUserAccount,
-      deleteUserAccount,
-      createDataItem,
-      updateDataItem,
-      deleteDataItem,
-    }),
-    [
-      user,
-      managedUsers,
-      managedData,
-      isBootstrapping,
-      login,
-      register,
-      logout,
-      requestPasswordReset,
-      updatePassword,
-      createUserAccount,
-      deleteUserAccount,
-      createDataItem,
-      updateDataItem,
-      deleteDataItem,
-    ],
-  );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -267,4 +186,3 @@ export function useAuth() {
 
   return context;
 }
-

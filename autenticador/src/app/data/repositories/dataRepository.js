@@ -1,35 +1,29 @@
-﻿import supabase from "../../utils/supabase";
+import supabase from "../../utils/supabase";
 
 const DATA_TABLE = "data_records";
+const DATA_SELECT = "id,key,value,updated_at";
 
-function ensureNoError(error, context) {
-  if (error) {
-    throw new Error(`${context}: ${error.message}`);
-  }
-}
-
-function mapDataRecord(record) {
-  if (!record) {
-    return null;
-  }
-
-  return {
-    id: record.id,
-    key: record.key,
-    value: record.value,
-    updatedAt: record.updated_at ?? record.updatedAt ?? null,
-  };
-}
+const mapRecord = (record) =>
+  record
+    ? {
+        id: record.id,
+        key: record.key,
+        value: record.value,
+        updatedAt: record.updated_at ?? record.updatedAt ?? null,
+      }
+    : null;
 
 export async function listDataRecords() {
   const { data, error } = await supabase
     .from(DATA_TABLE)
-    .select("id,key,value,updated_at")
+    .select(DATA_SELECT)
     .order("id", { ascending: true });
 
-  ensureNoError(error, "Error al consultar datos");
+  if (error) {
+    throw new Error(`Error al consultar datos: ${error.message}`);
+  }
 
-  return (data ?? []).map(mapDataRecord);
+  return (data ?? []).map(mapRecord);
 }
 
 export async function createDataRecord({ key, value }) {
@@ -40,12 +34,14 @@ export async function createDataRecord({ key, value }) {
       value,
       updated_at: new Date().toISOString(),
     })
-    .select("id,key,value,updated_at")
+    .select(DATA_SELECT)
     .maybeSingle();
 
-  ensureNoError(error, "Error al crear dato");
+  if (error) {
+    throw new Error(`Error al crear dato: ${error.message}`);
+  }
 
-  return mapDataRecord(data);
+  return mapRecord(data);
 }
 
 export async function updateDataRecord({ id, key, value }) {
@@ -57,12 +53,14 @@ export async function updateDataRecord({ id, key, value }) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .select("id,key,value,updated_at")
+    .select(DATA_SELECT)
     .maybeSingle();
 
-  ensureNoError(error, "Error al actualizar dato");
+  if (error) {
+    throw new Error(`Error al actualizar dato: ${error.message}`);
+  }
 
-  return mapDataRecord(data);
+  return mapRecord(data);
 }
 
 export async function deleteDataRecord(id) {
@@ -72,7 +70,9 @@ export async function deleteDataRecord(id) {
     .eq("id", id)
     .select("id");
 
-  ensureNoError(error, "Error al eliminar dato");
+  if (error) {
+    throw new Error(`Error al eliminar dato: ${error.message}`);
+  }
 
   return (data?.length ?? 0) > 0;
 }

@@ -1,9 +1,8 @@
-﻿import { Stethoscope } from "lucide-react";
-import { sectionCardClass } from "./dashboardStyles";
+import { Stethoscope } from "lucide-react";
 
 function HealthSection({ healthResult, isCheckingHealth, onCheckHealth }) {
   return (
-    <section className={sectionCardClass}>
+    <section className="rounded-[2px] border border-[#e1e1e1] bg-white p-6">
       <div className="mb-4 flex items-center gap-2">
         <Stethoscope size={16} className="text-[#0078D4]" />
         <h3 className="text-[16px] font-semibold text-[#323130]">Salud del sistema</h3>
