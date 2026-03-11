@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Database, Stethoscope, User, UserPlus } from "lucide-react";
+import { Stethoscope, User, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { checkSystemHealth } from "../business/services/internetService";
@@ -7,7 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 import AccountSection from "../components/dashboard/AccountSection";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import UsersSection from "../components/dashboard/UsersSection";
-import DataSection from "../components/dashboard/DataSection";
 import HealthSection from "../components/dashboard/HealthSection";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+$/;
@@ -17,13 +16,9 @@ function DashboardPage() {
   const {
     user,
     users,
-    dataItems,
     logout,
     createUserAccount,
     deleteUserAccount,
-    createDataItem,
-    updateDataItem,
-    deleteDataItem,
   } = useAuth();
 
   const isAdmin = user?.role === "admin";
@@ -38,7 +33,6 @@ function DashboardPage() {
     return [
       ...baseItems,
       { id: "users", label: "Gestion de usuarios", icon: UserPlus },
-      { id: "data", label: "Gestion de datos", icon: Database },
       { id: "health", label: "Salud del sistema", icon: Stethoscope },
     ];
   }, [isAdmin]);
@@ -57,11 +51,6 @@ function DashboardPage() {
     email: "",
   });
   const [isSavingUser, setIsSavingUser] = useState(false);
-
-  const [dataForm, setDataForm] = useState({ key: "", value: "" });
-  const [dataErrors, setDataErrors] = useState({ key: "", value: "" });
-  const [editingDataId, setEditingDataId] = useState(null);
-  const [isSavingData, setIsSavingData] = useState(false);
 
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const [healthResult, setHealthResult] = useState(null);
@@ -135,83 +124,6 @@ function DashboardPage() {
     toast.success(result.message);
   };
 
-  const handleDataChange = (field, value) => {
-    setDataForm((current) => ({ ...current, [field]: value }));
-    setDataErrors((current) => ({ ...current, [field]: "" }));
-  };
-
-  const validateDataForm = () => {
-    const nextErrors = { key: "", value: "" };
-
-    if (!dataForm.key.trim()) {
-      nextErrors.key = "Campo obligatorio";
-    }
-
-    if (!dataForm.value.trim()) {
-      nextErrors.value = "Campo obligatorio";
-    }
-
-    return nextErrors;
-  };
-
-  const handleSaveData = async (event) => {
-    event.preventDefault();
-
-    const nextErrors = validateDataForm();
-    setDataErrors(nextErrors);
-
-    if (Object.values(nextErrors).some(Boolean)) {
-      toast.error("Revise los datos del registro.");
-      return;
-    }
-
-    setIsSavingData(true);
-
-    const result = editingDataId
-      ? await updateDataItem({ id: editingDataId, ...dataForm })
-      : await createDataItem(dataForm);
-
-    setIsSavingData(false);
-
-    if (!result.success) {
-      toast.error(result.message);
-      return;
-    }
-
-    toast.success(result.message);
-    setDataForm({ key: "", value: "" });
-    setDataErrors({ key: "", value: "" });
-    setEditingDataId(null);
-  };
-
-  const handleEditData = (record) => {
-    setEditingDataId(record.id);
-    setDataForm({ key: record.key, value: record.value });
-    setDataErrors({ key: "", value: "" });
-    setActiveSection("data");
-  };
-
-  const handleCancelEditData = () => {
-    setEditingDataId(null);
-    setDataForm({ key: "", value: "" });
-    setDataErrors({ key: "", value: "" });
-  };
-
-  const handleDeleteData = async (id) => {
-    const result = await deleteDataItem(id);
-
-    if (!result.success) {
-      toast.error(result.message);
-      return;
-    }
-
-    toast.success(result.message);
-
-    if (editingDataId === id) {
-      handleCancelEditData();
-    }
-  };
-
   const handleCheckHealth = async () => {
     setIsCheckingHealth(true);
     const result = await checkSystemHealth();
@@ -238,23 +150,6 @@ function DashboardPage() {
           onUserChange={handleUserChange}
           onCreateUser={handleCreateUser}
           onDeleteUser={handleDeleteUser}
-        />
-      );
-    }
-
-    if (effectiveSection === "data" && isAdmin) {
-      return (
-        <DataSection
-          dataItems={dataItems}
-          dataForm={dataForm}
-          dataErrors={dataErrors}
-          editingDataId={editingDataId}
-          isSavingData={isSavingData}
-          onDataChange={handleDataChange}
-          onSaveData={handleSaveData}
-          onCancelEditData={handleCancelEditData}
-          onEditData={handleEditData}
-          onDeleteData={handleDeleteData}
         />
       );
     }
