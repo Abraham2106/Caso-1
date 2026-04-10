@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Autenticador Componentes</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <div class="auth-layout">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Crear cuenta</h2>
+        <p>Registre un usuario para acceder al sistema.</p>
+      </div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="control-label" for="reg-name">Nombre completo</label>
+          <input type="text" id="reg-name" class="form-control" autocomplete="name">
+          <span id="reg-name-error" class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="reg-email">Correo electrónico</label>
+          <input type="email" id="reg-email" class="form-control" autocomplete="email">
+          <span id="reg-email-error" class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="reg-username">Nombre de usuario</label>
+          <input type="text" id="reg-username" class="form-control" autocomplete="username">
+          <span id="reg-username-error" class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="reg-password">Contraseña</label>
+          <input type="password" id="reg-password" class="form-control" autocomplete="new-password">
+          <span id="reg-password-error" class="error-msg"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="control-label" for="reg-confirm">Confirmar contraseña</label>
+          <input type="password" id="reg-confirm" class="form-control" autocomplete="new-password">
+          <span id="reg-confirm-error" class="error-msg"></span>
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary mb-2" style="margin-bottom: 8px;">
+          Registrarse
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='./index.html'">
+          Volver a inicio
+        </button>
+      </form>
+
+      <div class="text-center mt-6 pt-4 bt">
+        <span style="color: var(--ms-text-secondary);">¿Ya tiene cuenta?</span>
+        <a href="index.html">Iniciar sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script type="module" src="./js/pages/register.js"></script>
+</body>
+</html>
