@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fields = ['reg-name', 'reg-email', 'reg-username', 'reg-password', 'reg-confirm'];
     clearErrors(fields);
 
-    // Validación Básica General
+    
     let hasErrors = runValidations({
       'reg-name': validateRequired,
       'reg-email': validateEmail,
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'reg-password': validatePassword
     }, setFieldError);
 
-    // Validación Específica
+    
     const pwd = document.getElementById('reg-password').value;
     const confirm = document.getElementById('reg-confirm').value;
     if (!validateRequired(confirm) && pwd !== confirm) {

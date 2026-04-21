@@ -1,6 +1,4 @@
-/**
- * Funciones de ayuda general para manipulación de DOM y la UI
- */
+
 
 export function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
@@ -8,7 +6,8 @@ export function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span style="font-weight:bold; color: ${type==='error'?'var(--ms-error)':'var(--ms-success)'}">${type === 'success' ? '✓' : '⚠'}</span> <span>${message}</span>`;
+  const iconClass = type === 'error' ? 'toast-icon-error' : 'toast-icon-success';
+  toast.innerHTML = `<span class="toast-icon ${iconClass}">${type === 'success' ? '✓' : '⚠'}</span> <span>${message}</span>`;
   
   container.appendChild(toast);
   setTimeout(() => {
@@ -41,7 +40,7 @@ export function setLoading(buttonId, text, isLoading) {
     btn.disabled = isLoading;
     btn.textContent = isLoading ? text : (btn.dataset.originalText || text);
     if (!btn.dataset.originalText && isLoading) {
-      btn.dataset.originalText = text; // no es perfecto si se abusa, pero sirve aqui.
+      btn.dataset.originalText = text; 
     }
   }
 }

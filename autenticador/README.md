@@ -1,8 +1,8 @@
-﻿# Caso 1 - Prototipo de Sistema Autentificador
+# Caso 1 - Prototipo de Sistema Autentificador
 
 ## 1. Descripcion del caso de estudio
 Este primer caso de estudio aborda el desarrollo de un **prototipo de interfaz para un sistema autentificador**.
-Durante la primera semana se repasaron fundamentos de ingenieria de software (incluyendo ciclo de vida), y se aplico la teoria mediante el modelo de desarrollo **"Codifique y corrija"** para construir una solucion funcional y demostrable.
+Durante la primera semana se repasaron fundamentos de ingenieria de software (incluyendo ciclo de vida), y se aplico la teoria mediante el modelo de desarrollo **"Codifique y corrija"** para construir una solucion funcional y demostrable. Esta versión ha sido optimizada para limpieza total, eliminando todos los comentarios del código fuente para un estado "production-ready".
 
 > Importante: este proyecto es un **prototipo**, no un sistema productivo completo.
 

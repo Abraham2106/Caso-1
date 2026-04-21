@@ -1,6 +1,4 @@
-/**
- * Reglas centralizadas de validación
- */
+
 
 export const validateRequired = (val) => {
   if (!val || val.trim() === '') return 'Campo obligatorio';
@@ -29,7 +27,7 @@ export const validatePassword = (val) => {
   return null;
 };
 
-// Comprueba varios rules y aplica los errores al DOM vía helpers
+
 export function runValidations(fieldsObj, setFieldErrorFn) {
   let hasErrors = false;
   for (const [fieldId, validationRule] of Object.entries(fieldsObj)) {

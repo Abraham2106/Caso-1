@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Autenticador Componentes</title>
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/dashboard.css">
 </head>
+
 <body>
 
-  <!-- Top Header -->
+
   <header class="app-header">
     <div class="app-title">Sistema Autenticador</div>
-    <button id="btn-logout" class="btn btn-secondary" style="height: 32px; width: auto;">Cerrar sesión</button>
+    <button id="btn-logout" class="btn btn-secondary btn-small">Cerrar sesión</button>
   </header>
 
-  <!-- Main Layout -->
+
   <main class="app-main">
-    
-    <!-- Sidebar Navigation -->
+
+
     <aside class="sidebar-nav" id="sidebar">
       <a class="nav-link active" data-target="tab-account">
         <span>Mi cuenta</span>
@@ -28,98 +31,75 @@
       <a class="nav-link hidden" data-target="tab-data" id="nav-data">
         <span>Gestión de datos</span>
       </a>
-      <a class="nav-link hidden" data-target="tab-health" id="nav-health">
-        <span>Salud del sistema</span>
-      </a>
     </aside>
 
-    <!-- Content Sections -->
+
     <section class="content-area">
 
-      <!-- ACCOUNT TAB -->
+
       <div id="tab-account" class="tab-pane">
         <div class="panel">
-          <h3 class="panel-title" style="color: var(--ms-text); font-size: 20px;">Bienvenido, <span id="v-name"></span></h3>
-          <p style="color:var(--ms-text-secondary); margin-bottom: 24px;">Panel principal del sistema</p>
-          
-          <div style="border-top: 1px solid var(--ms-border); padding-top: 16px;">
-             <p style="margin-bottom: 8px;"><strong>Nombre:</strong> <span id="v-name-val"></span></p>
-             <p style="margin-bottom: 8px;"><strong>Email:</strong> <span id="v-email-val"></span></p>
-             <p style="margin-bottom: 8px;"><strong>Estado:</strong> <span style="color: var(--ms-success)">Sesión Activa</span></p>
-             <p><strong>Rol:</strong> <span id="v-role-val" style="text-transform: capitalize;"></span></p>
+          <h3 class="panel-title panel-title-welcome">Bienvenido, <span id="v-name"></span>
+          </h3>
+          <p class="text-secondary mb-6">Panel principal del sistema</p>
+
+          <div class="border-top pt-4">
+            <p class="mb-2"><strong>Nombre:</strong> <span id="v-name-val"></span></p>
+            <p class="mb-2"><strong>Email:</strong> <span id="v-email-val"></span></p>
+            <p class="mb-2"><strong>Estado:</strong> <span class="text-success">Sesión
+                Activa</span></p>
+            <p><strong>Rol:</strong> <span id="v-role-val" class="capitalize"></span></p>
           </div>
         </div>
 
         <div id="admin-info-card" class="panel hidden">
           <h3 class="panel-title">Arquitectura en 3 capas</h3>
-          <p style="margin-bottom: 8px;">
+          <p class="mb-2">
             El sistema se organiza en Presentación, Negocio y Datos. En esta versión Vainilla "Balanceada":
           </p>
-          <ul style="padding-left: 20px; color: var(--ms-text-secondary);">
+          <ul class="pl-5 text-secondary">
             <li><strong>Presentación:</strong> Vistas HTML limpias + Event listeners y handlers (`js/pages/`).</li>
             <li><strong>Negocio:</strong> Lógica centralizada (`js/business/`).</li>
-            <li><strong>Datos:</strong> `js/data/store.js` asume responsabilidades de base local con simulaciones P2P/Server mock.</li>
+            <li><strong>Datos:</strong> `js/data/store.js` asume responsabilidades de base local con simulaciones
+              P2P/Server mock.</li>
           </ul>
         </div>
       </div>
 
-      <!-- USERS TAB -->
+
       <div id="tab-users" class="tab-pane hidden">
         <div class="panel">
           <h3 class="panel-title">Gestión de usuarios</h3>
-          <form id="form-manage-user" class="inline-form" style="margin-bottom: 24px;">
+          <form id="form-manage-user" class="inline-form mb-6">
             <input type="text" id="mu-name" class="form-control" placeholder="Nombre" required>
             <input type="email" id="mu-email" class="form-control" placeholder="Correo electrónico" required>
-            <button type="submit" id="btn-mu" class="btn btn-primary" style="flex-shrink: 0; width: 140px;">Agregar perfil</button>
+            <button type="submit" id="btn-mu" class="btn btn-primary shrink-0 w-140">Agregar
+              perfil</button>
           </form>
 
-          <p style="color: var(--ms-text-secondary); border-top: 1px solid var(--ms-border); padding-top: 16px; margin-bottom: 12px; font-size: 13px;">Usuarios registrados en el localStore:</p>
+          <p class="text-secondary border-top pt-4 mb-3 fs-13">
+            Usuarios registrados en el localStore:</p>
           <div id="list-users" class="list-container"></div>
         </div>
       </div>
 
-      <!-- DATA TAB -->
+
       <div id="tab-data" class="tab-pane hidden">
         <div class="panel">
           <h3 class="panel-title">Gestión de datos</h3>
-          <form id="form-manage-data" class="inline-form" style="margin-bottom: 24px;">
+          <form id="form-manage-data" class="inline-form mb-6">
             <input type="hidden" id="md-id">
             <input type="text" id="md-key" class="form-control" placeholder="Clave" required>
             <input type="text" id="md-value" class="form-control" placeholder="Valor" required>
-            <button type="submit" id="btn-md" class="btn btn-primary" style="flex-shrink: 0; width: 100px;">Guardar</button>
-            <button type="button" id="btn-md-cancel" class="btn btn-secondary hidden" style="flex-shrink: 0; width: 140px;" onclick="document.getElementById('form-manage-data').reset(); this.classList.add('hidden'); document.getElementById('md-id').value=''; document.getElementById('btn-md').textContent='Guardar';">Cancelar edición</button>
+            <button type="submit" id="btn-md" class="btn btn-primary shrink-0 w-100">Guardar</button>
+            <button type="button" id="btn-md-cancel" class="btn btn-secondary hidden shrink-0 w-140"
+              onclick="document.getElementById('form-manage-data').reset(); this.classList.add('hidden'); document.getElementById('md-id').value=''; document.getElementById('btn-md').textContent='Guardar';">Cancelar
+              edición</button>
           </form>
-          
-          <p style="color: var(--ms-text-secondary); border-top: 1px solid var(--ms-border); padding-top: 16px; margin-bottom: 12px; font-size: 13px;">Registros:</p>
+
+          <p class="text-secondary border-top pt-4 mb-3 fs-13">
+            Registros:</p>
           <div id="list-data" class="list-container"></div>
-        </div>
-      </div>
-
-      <!-- HEALTH TAB -->
-      <div id="tab-health" class="tab-pane hidden">
-        <div class="panel">
-          <h3 class="panel-title">Salud del sistema</h3>
-          <p style="color: var(--ms-text-secondary); margin-bottom: 24px;">Ping a los repositorios locales para verificar las latencias.</p>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
-            <div style="background: var(--ms-bg-main); padding: 16px; border-radius: var(--ms-radius); border: 1px solid var(--ms-border);">
-              <p style="font-size: 12px; color: var(--ms-text-secondary);">Estado</p>
-              <h4 id="h-status" style="margin-top: 4px; font-weight: 500; font-size: 15px;">Sin verificar</h4>
-            </div>
-            <div style="background: var(--ms-bg-main); padding: 16px; border-radius: var(--ms-radius); border: 1px solid var(--ms-border);">
-              <p style="font-size: 12px; color: var(--ms-text-secondary);">Latencia Local</p>
-              <h4 id="h-latency" style="margin-top: 4px; font-weight: 500; font-size: 15px;">-- ms</h4>
-            </div>
-            <div style="background: var(--ms-bg-main); padding: 16px; border-radius: var(--ms-radius); border: 1px solid var(--ms-border);">
-              <p style="font-size: 12px; color: var(--ms-text-secondary);">Última Verificación</p>
-              <h4 id="h-time" style="margin-top: 4px; font-weight: 500; font-size: 13px;">-- </h4>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between;">
-            <button id="btn-ping" class="btn btn-primary" style="width: auto;">Hacer Ping Storage</button>
-            <p id="h-logs" style="font-size: 13px; color: var(--ms-text-secondary);"></p>
-          </div>
         </div>
       </div>
 
@@ -127,8 +107,8 @@
   </main>
 
   <div id="toast-container"></div>
-  <!-- Para poder usar onclicks directos de HTML necesitamos agregarlos al window, 
-       pero al ser type=module usaremos addEventListener -->
+
   <script type="module" src="./js/pages/dashboard.js"></script>
 </body>
+
 </html>

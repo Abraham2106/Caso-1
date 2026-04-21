@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro - Autenticador Componentes</title>
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/register.css">
 </head>
 <body>
   <div class="auth-layout">
@@ -39,13 +40,13 @@
           <span id="reg-password-error" class="error-msg"></span>
         </div>
 
-        <div class="form-group" style="margin-bottom: 24px;">
+        <div class="form-group mb-6">
           <label class="control-label" for="reg-confirm">Confirmar contraseña</label>
           <input type="password" id="reg-confirm" class="form-control" autocomplete="new-password">
           <span id="reg-confirm-error" class="error-msg"></span>
         </div>
 
-        <button type="submit" id="btn-submit" class="btn btn-primary mb-2" style="margin-bottom: 8px;">
+        <button type="submit" id="btn-submit" class="btn btn-primary mb-2">
           Registrarse
         </button>
         <button type="button" class="btn btn-secondary" onclick="window.location.href='./index.html'">
@@ -54,7 +55,7 @@
       </form>
 
       <div class="text-center mt-6 pt-4 bt">
-        <span style="color: var(--ms-text-secondary);">¿Ya tiene cuenta?</span>
+        <span class="text-secondary">¿Ya tiene cuenta?</span>
         <a href="index.html">Iniciar sesión</a>
       </div>
     </div>

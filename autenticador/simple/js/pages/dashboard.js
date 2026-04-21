@@ -1,7 +1,7 @@
 import { getActiveSession, logout } from '../business/authService.js';
 import { 
   getAllUsers, createManagedUser, removeManagedUser,
-  getAllData, saveRecord, removeRecord, performHealthCheck
+  getAllData, saveRecord, removeRecord
 } from '../business/adminService.js';
 import { showToast, setLoading } from '../ui/helpers.js';
 
@@ -14,23 +14,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Llenar vista inicial (Mi Cuenta)
+  
   document.getElementById('v-name').textContent = sessionUser.name;
   document.getElementById('v-name-val').textContent = sessionUser.name;
   document.getElementById('v-email-val').textContent = sessionUser.email;
   document.getElementById('v-role-val').textContent = sessionUser.role;
 
-  // Renderizar navegación condicional (Solo admin verá los botones)
+  
   const isAdmin = sessionUser.role === 'admin';
   if (isAdmin) {
     document.getElementById('nav-users').classList.remove('hidden');
     document.getElementById('nav-data').classList.remove('hidden');
-    document.getElementById('nav-health').classList.remove('hidden');
     document.getElementById('admin-info-card').classList.remove('hidden');
     initAdminListeners();
   }
 
-  // Listener Navegación por tabs
+  
   const navLinks = document.querySelectorAll('.nav-link');
   const tabs = document.querySelectorAll('.tab-pane');
   
@@ -47,17 +46,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Logout Listener
+  
   document.getElementById('btn-logout').addEventListener('click', async () => {
     await logout();
     window.location.replace('./index.html');
   });
 });
 
-/**
- * INIT DE VISTAS ADMIN
- * Separado para mantener limpieza de la carga inicial
- */
+
 function initAdminListeners() {
   const formUser = document.getElementById('form-manage-user');
   formUser.addEventListener('submit', async (e) => {
@@ -88,32 +84,13 @@ function initAdminListeners() {
     
     if (res.success) {
       showToast(res.message, 'success');
-      document.getElementById('btn-md-cancel').click(); // trigger reset
+      document.getElementById('btn-md-cancel').click(); 
       renderData();
     } else { showToast(res.message, 'error'); }
   });
 
-  document.getElementById('btn-ping').addEventListener('click', async () => {
-    setLoading('btn-ping', '...', true);
-    const res = await performHealthCheck();
-    setLoading('btn-ping', 'Hacer Ping Storage', false);
 
-    const stEl = document.getElementById('h-status');
-    if (res.success) {
-      stEl.textContent = "Operativo";
-      stEl.style.color = "var(--ms-success)";
-      showToast(res.message + ` (${res.latencyMs}ms)`, 'success');
-    } else {
-      stEl.textContent = "Falla de Sistema";
-      stEl.style.color = "var(--ms-error)";
-      showToast(res.detail, 'error');
-    }
-    document.getElementById('h-latency').textContent = res.latencyMs + ' ms';
-    document.getElementById('h-time').textContent = new Date().toLocaleString();
-    if(res.stats) document.getElementById('h-logs').textContent = `Metric: users(${res.stats.users}), data(${res.stats.data})`;
-  });
-
-  // Attach a window func so inline onclicks in generated HTML work (since we are module)
+  
   window.adminDeleteUser = async (email) => {
     const res = await removeManagedUser(email, sessionUser.email);
     showToast(res.message, res.success ? 'success' : 'error');

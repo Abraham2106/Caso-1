@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Autenticador Componentes</title>
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
   <div class="auth-layout">
@@ -27,9 +28,9 @@
           <span id="login-password-error" class="error-msg"></span>
         </div>
 
-        <!-- Solo para cumplir el visual: No hace nada en este UI ya que es mock -->
-        <div class="text-right" style="margin-bottom: 16px;">
-          <a href="#" style="font-size: 14px;">¿Olvidó su contraseña?</a>
+        
+        <div class="text-right mb-4">
+          <a href="forgot-password.html" class="fs-14">¿Olvidó su contraseña?</a>
         </div>
 
         <button type="submit" id="btn-submit" class="btn btn-primary" data-original-text="Iniciar sesión">
@@ -38,7 +39,7 @@
       </form>
 
       <div class="text-center mt-6 pt-4 bt">
-        <span style="color: var(--ms-text-secondary);">¿No tiene cuenta?</span>
+        <span class="text-secondary">¿No tiene cuenta?</span>
         <a href="register.html">Registrarse</a>
       </div>
     </div>

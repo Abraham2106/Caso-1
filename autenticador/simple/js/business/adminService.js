@@ -3,11 +3,11 @@ import {
   fetchRecords, insertRecord, editRecord, deleteDataRecord 
 } from '../data/store.js';
 
-// ---- ADMIN: USERS ----
+
 
 export async function getAllUsers() {
   const users = await fetchUsers();
-  // Retornamos sin contraseñas por buena práctica de la capa de negocio
+  
   return users.map(({ password, ...safeData }) => safeData);
 }
 
@@ -33,7 +33,7 @@ export async function removeManagedUser(email, adminEmail) {
   return deleted ? { success: true, message: "Usuario eliminado" } : { success: false, message: "Hubo un error del sistema." };
 }
 
-// ---- ADMIN: DATA ----
+
 
 export async function getAllData() {
   return await fetchRecords();
@@ -54,7 +54,7 @@ export async function removeRecord(id) {
   return res ? { success: true, message: "Registro eliminado." } : { success: false, message: "No se pudo borrar." };
 }
 
-// ---- ADMIN: HEALTH CHECK ----
+
 
 export async function performHealthCheck() {
   const start = Date.now();

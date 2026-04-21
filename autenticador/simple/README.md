@@ -1,8 +1,6 @@
 # Autenticador (Vainilla por Componentes)
 
-Esta es la versión Balanceada del proyecto original, utilizando la arquitectura pura en HTML/CSS/JS (Vainilla) de MS. Cumple la premisa de mantener código modularizado (la lógica estricta de componentes reusables) pero sin la masiva verbosidad del proyecto enterprise.
-
-Ningún script pasa las 150 líneas, aliviando la lectura.
+Esta es la versión Balanceada del proyecto original, utilizando la arquitectura pura en HTML/CSS/JS (Vainilla) de MS. Cumple la premisa de mantener código modularizado (la lógica estricta de componentes reusables) pero sin la masiva verbosidad del proyecto enterprise. El código ha sido limpiado de todos los comentarios internos para facilitar una lectura directa y profesional.
 Las capas han sido re-estructuradas en HTML Components:
 - `js/data/`: `store.js` manipula Promesas contra el LocalStorage para simular bases de datos.
 - `js/business/`: Reglas de negocio separadas por dominios (`authService`, `adminService`).

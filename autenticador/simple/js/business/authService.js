@@ -3,7 +3,6 @@ import { getUserByField, insertUser, updatePassword } from '../data/store.js';
 const SESSION_KEY = "auth_current_session";
 const RECOVERY_KEY = "auth_recovery_email";
 
-// Helper sincronizado para sacar el perfil de memoria del usuario actual
 export function getActiveSession() {
   const data = sessionStorage.getItem(SESSION_KEY);
   return data ? JSON.parse(data) : null;
@@ -15,7 +14,6 @@ export async function login(email, password) {
     return { success: false, message: "Credenciales inválidas. Verifique sus datos." };
   }
   
-  // Limpiamos el password por seguridad al guardar en sesión
   const { password: _, ...safeUser } = user;
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(safeUser));
   return { success: true, message: "Inicio de sesión exitoso.", user: safeUser };
@@ -38,7 +36,7 @@ export async function register(userData) {
     email,
     username,
     password: userData.password,
-    role: "user" // Role por defecto al public-register
+    role: "user" 
   });
 
   const { password: _, ...safeUser } = newUser;

@@ -1,13 +1,9 @@
-/**
- * Capa de Datos (Data Layer)
- * Maneja la persistencia en localStorage utilizando APIs asíncronas
- * para simular el comportamiento de una base de datos real o backend como Supabase.
- */
+
 
 const DB_USERS = 'app_db_users';
 const DB_RECORDS = 'app_db_records';
 
-// Utilidad interna para simular latencia de red (50ms - 200ms)
+
 const simulateNetwork = () => new Promise(res => setTimeout(res, Math.random() * 150 + 50));
 
 export async function initStorage() {
@@ -15,7 +11,8 @@ export async function initStorage() {
   if (!localStorage.getItem(DB_USERS)) {
     const seedUsers = [
       { id: 1, name: "Admin Demo", username: "demo", email: "demo@example.com", password: "123", role: "admin", createdAt: new Date().toISOString() },
-      { id: 2, name: "User Demo", username: "user", email: "user@example.com", password: "123", role: "user", createdAt: new Date().toISOString() }
+      { id: 2, name: "User Demo", username: "user", email: "user@example.com", password: "123", role: "user", createdAt: new Date().toISOString() },
+      { id: 3, name: "Solano Admin", username: "solanoabe", email: "solanoabe215@gmail.com", password: "password123", role: "admin", createdAt: new Date().toISOString() }
     ];
     localStorage.setItem(DB_USERS, JSON.stringify(seedUsers));
   }
@@ -42,7 +39,7 @@ function nextId(items) {
   return items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
 }
 
-// ---- Data Methods: USERS ----
+
 
 export async function fetchUsers() {
   return await readTable(DB_USERS);
@@ -83,7 +80,7 @@ export async function getUserByField(field, value) {
   return users.find(u => u[field] === value) || null;
 }
 
-// ---- Data Methods: RECORDS ----
+
 
 export async function fetchRecords() {
   return await readTable(DB_RECORDS);
