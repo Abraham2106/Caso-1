@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Autenticador Componentes</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+  <div class="auth-layout">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Iniciar sesión</h2>
+        <p>Acceda con su cuenta para continuar.</p>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="control-label" for="login-email">Correo electrónico</label>
+          <input type="email" id="login-email" class="form-control" autocomplete="email">
+          <span id="login-email-error" class="error-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label" for="login-password">Contraseña</label>
+          <input type="password" id="login-password" class="form-control" autocomplete="current-password">
+          <span id="login-password-error" class="error-msg"></span>
+        </div>
+
+        
+        <div class="text-right mb-4">
+          <a href="forgot-password.html" class="fs-14">¿Olvidó su contraseña?</a>
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary" data-original-text="Iniciar sesión">
+          Iniciar sesión
+        </button>
+      </form>
+
+      <div class="text-center mt-6 pt-4 bt">
+        <span class="text-secondary">¿No tiene cuenta?</span>
+        <a href="register.html">Registrarse</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script type="module" src="./js/pages/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Autenticador Componentes</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+
+<body>
+
+
+  <header class="app-header">
+    <div class="app-title">Sistema Autenticador</div>
+    <button id="btn-logout" class="btn btn-secondary btn-small">Cerrar sesión</button>
+  </header>
+
+
+  <main class="app-main">
+
+
+    <aside class="sidebar-nav" id="sidebar">
+      <a class="nav-link active" data-target="tab-account">
+        <span>Mi cuenta</span>
+      </a>
+      <a class="nav-link hidden" data-target="tab-users" id="nav-users">
+        <span>Gestión de usuarios</span>
+      </a>
+      <a class="nav-link hidden" data-target="tab-data" id="nav-data">
+        <span>Gestión de datos</span>
+      </a>
+    </aside>
+
+
+    <section class="content-area">
+
+
+      <div id="tab-account" class="tab-pane">
+        <div class="panel">
+          <h3 class="panel-title panel-title-welcome">Bienvenido, <span id="v-name"></span>
+          </h3>
+          <p class="text-secondary mb-6">Panel principal del sistema</p>
+
+          <div class="border-top pt-4">
+            <p class="mb-2"><strong>Nombre:</strong> <span id="v-name-val"></span></p>
+            <p class="mb-2"><strong>Email:</strong> <span id="v-email-val"></span></p>
+            <p class="mb-2"><strong>Estado:</strong> <span class="text-success">Sesión
+                Activa</span></p>
+            <p><strong>Rol:</strong> <span id="v-role-val" class="capitalize"></span></p>
+          </div>
+        </div>
+
+        <div id="admin-info-card" class="panel hidden">
+          <h3 class="panel-title">Arquitectura en 3 capas</h3>
+          <p class="mb-2">
+            El sistema se organiza en Presentación, Negocio y Datos. En esta versión Vainilla "Balanceada":
+          </p>
+          <ul class="pl-5 text-secondary">
+            <li><strong>Presentación:</strong> Vistas HTML limpias + Event listeners y handlers (`js/pages/`).</li>
+            <li><strong>Negocio:</strong> Lógica centralizada (`js/business/`).</li>
+            <li><strong>Datos:</strong> `js/data/store.js` asume responsabilidades de base local con simulaciones
+              P2P/Server mock.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div id="tab-users" class="tab-pane hidden">
+        <div class="panel">
+          <h3 class="panel-title">Gestión de usuarios</h3>
+          <form id="form-manage-user" class="inline-form mb-6">
+            <input type="text" id="mu-name" class="form-control" placeholder="Nombre" required>
+            <input type="email" id="mu-email" class="form-control" placeholder="Correo electrónico" required>
+            <button type="submit" id="btn-mu" class="btn btn-primary shrink-0 w-140">Agregar
+              perfil</button>
+          </form>
+
+          <p class="text-secondary border-top pt-4 mb-3 fs-13">
+            Usuarios registrados en el localStore:</p>
+          <div id="list-users" class="list-container"></div>
+        </div>
+      </div>
+
+
+      <div id="tab-data" class="tab-pane hidden">
+        <div class="panel">
+          <h3 class="panel-title">Gestión de datos</h3>
+          <form id="form-manage-data" class="inline-form mb-6">
+            <input type="hidden" id="md-id">
+            <input type="text" id="md-key" class="form-control" placeholder="Clave" required>
+            <input type="text" id="md-value" class="form-control" placeholder="Valor" required>
+            <button type="submit" id="btn-md" class="btn btn-primary shrink-0 w-100">Guardar</button>
+            <button type="button" id="btn-md-cancel" class="btn btn-secondary hidden shrink-0 w-140"
+              onclick="document.getElementById('form-manage-data').reset(); this.classList.add('hidden'); document.getElementById('md-id').value=''; document.getElementById('btn-md').textContent='Guardar';">Cancelar
+              edición</button>
+          </form>
+
+          <p class="text-secondary border-top pt-4 mb-3 fs-13">
+            Registros:</p>
+          <div id="list-data" class="list-container"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script type="module" src="./js/pages/dashboard.js"></script>
+</body>
+
+</html>

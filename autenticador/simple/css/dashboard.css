@@ -1,0 +1,92 @@
+/* Dashboard Layout */
+.app-header {
+  height: 56px;
+  background-color: var(--ms-bg-card);
+  border-bottom: 1px solid var(--ms-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.app-title { font-weight: 600; font-size: 16px; }
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .app-main { grid-template-columns: 1fr; }
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: var(--ms-text);
+  border-radius: var(--ms-radius);
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #e5e5e5;
+}
+
+.nav-link.active {
+  background-color: var(--ms-bg-card);
+  border: 1px solid var(--ms-border);
+}
+
+/* Sections & Panels */
+.panel {
+  background-color: var(--ms-bg-card);
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--ms-blue);
+}
+
+/* Tables / Lists */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.list-item {
+  border: 1px solid var(--ms-border);
+  padding: 16px;
+  border-radius: var(--ms-radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.list-item h4 { font-size: 15px; margin-bottom: 4px; }
+.list-item p { color: var(--ms-text-secondary); font-size: 13px; line-height: 1.5; }
+
+/* Forms */
+.inline-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+@media (max-width: 500px) {
+  .inline-form { flex-direction: column; }
+}
